@@ -1,0 +1,6 @@
+/**
+ * KNN
+ */
+public class KNN {
+
+}

@@ -1,0 +1,6 @@
+/**
+ * RandomForest
+ */
+public class RandomForest {
+
+}

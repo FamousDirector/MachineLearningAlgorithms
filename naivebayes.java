@@ -1,0 +1,6 @@
+/**
+ * NaiveBayes
+ */
+public class NaiveBayes {
+
+}
