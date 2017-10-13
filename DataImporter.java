@@ -18,7 +18,7 @@ public class DataImporter {
         DataImporter newData = new DataImporter(samplePath);
         
         } catch (Exception e) {
-            System.out.print("Fuck");
+            System.out.println("Nope");
         }
         
     }
