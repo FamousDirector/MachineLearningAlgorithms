@@ -18,7 +18,7 @@ public class DataImporter {
         DataImporter newData = new DataImporter(samplePath);
         
         } catch (Exception e) {
-            System.out.println("Nope");
+            e.printStackTrace();
         }
         
     }
@@ -27,7 +27,7 @@ public class DataImporter {
         this.NumberOfRows = countRows(dataFilePath);
         this.NumberOfColumns = countColumns(dataFilePath);
 
-        this.dataArray = new String [NumberOfColumns][NumberOfRows];
+        this.dataArray = new String [NumberOfRows][NumberOfColumns];
 
         InputStream iStream = new BufferedInputStream(new FileInputStream(dataFilePath));
         try {
@@ -37,16 +37,23 @@ public class DataImporter {
             int readChars = 0;
             while ((readChars = iStream.read(c)) != -1) {
                 for (int i = 0; i < readChars; ++i) {
-                    if (c[i] == '\n' && row < this.NumberOfRows) {
+                    if (c[i] == '\n') {
                         ++row;
+                        column = 0;
                     }
-                    else if (c[i] == ',' || c[i] == ' ') {
+                    else if ((c[i] == ',' || c[i] == ' ') && i > 0) {
                         if (c[i-1] != ',' || c[i-1] != ' '){
                             ++column;
                         }
                         
                     } else {
-                        this.dataArray[row][column] =  this.dataArray[row][column] + c;
+
+                        String newStringLetter = (new String(new byte[]{ c[i] }, "US-ASCII"));
+
+                        //System.out.println(row + " " + column + " " + newStringLetter);
+                        if(newStringLetter.matches("[A-Za-z0-9]+")) { //ensure value is alpha numeric
+                            this.dataArray[row][column] = this.dataArray[row][column] + newStringLetter;
+                        }
                     }
                 }
             }
@@ -61,7 +68,7 @@ public class DataImporter {
         InputStream iStream = new BufferedInputStream(new FileInputStream(dataFilePath));
         try {
             byte[] c = new byte[1024];
-            int count = 0;
+            int count = 1;
             int readChars = 0;
             boolean isEmpty = true;
             while ((readChars = iStream.read(c)) != -1) {
@@ -85,16 +92,18 @@ public class DataImporter {
         InputStream iStream = new BufferedInputStream(new FileInputStream(dataFilePath));
         try {
             byte[] c = new byte[1024];
-            int count = 0;
+            int count = 1;
             int readChars = 0;
             boolean isEmpty = true;
-            while ((readChars = iStream.read(c)) != -1) {
+            boolean isEndOfLine = false;
+            while (((readChars = iStream.read(c)) != -1) && !isEndOfLine) {
                 isEmpty = false;
                 for (int i = 0; i < readChars; ++i) {
                     if (c[i] == '\n') {
+                        isEndOfLine = true;
                         break;
                     }
-                    else if (c[i] == ',' || c[i] == ' ') {
+                    else if ((c[i] == ',' || c[i] == ' ') && i > 0) {
                         if (c[i-1] != ',' || c[i-1] != ' '){
                             ++count;
                         }
