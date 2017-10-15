@@ -1,6 +1,0 @@
-/**
- * ADABoost
- */
-public class ADABoost {
-
-}

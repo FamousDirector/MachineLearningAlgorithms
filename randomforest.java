@@ -1,6 +1,0 @@
-/**
- * RandomForest
- */
-public class RandomForest {
-
-}

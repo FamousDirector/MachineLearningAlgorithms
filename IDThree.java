@@ -1,7 +1,0 @@
-/**
- * IDThree
- */
-public class IDThree {
-
-
-}

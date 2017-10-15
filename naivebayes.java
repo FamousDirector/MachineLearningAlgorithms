@@ -1,6 +1,0 @@
-/**
- * NaiveBayes
- */
-public class NaiveBayes {
-
-}
