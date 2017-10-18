@@ -1,7 +1,10 @@
+import com.sun.xml.internal.bind.v2.model.util.ArrayInfoUtil;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  *
@@ -15,14 +18,13 @@ public class ClassifierData {
     public static void main(String[] args){
         String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
         try {
-        ClassifierData newClassifierData = new ClassifierData(samplePath,0);
-
-        System.out.println(newClassifierData.classArray[1]);
-
+            ClassifierData newClassifierData = new ClassifierData(samplePath,0);
+            newClassifierData.removeDataColumn(0);
+            System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
     }
 
     /**
@@ -34,7 +36,6 @@ public class ClassifierData {
     public ClassifierData(String dataFilePath, int classRowPosition) throws IOException{
         this.NumberOfDataRows = countRows(dataFilePath);
         this.NumberOfDataColumns = countColumns(dataFilePath);
-
         this.dataArray = new String [NumberOfDataRows][NumberOfDataColumns];
         this.classArray = new String [NumberOfDataRows];
 
@@ -46,8 +47,7 @@ public class ClassifierData {
             byte[] c = new byte[1024];
             int readChars;
             while ((readChars = iStream.read(c)) != -1) { // while there is a non empty line in the file
-
-                for (int i = 0; i < readChars; ++i) { //for every byte in the line
+                charInLineLoop: for (int i = 0; i < readChars; ++i) { //for every byte in the line
                     if (c[i] == '\n') { //if end of line
                         ++row;
                         column = 0;
@@ -59,11 +59,8 @@ public class ClassifierData {
                                 ++dataColumn;
                             }
                             ++column;
-
                         }
-                        
                     } else {
-
                         String newStringLetter = (new String(new byte[]{ c[i] }, "US-ASCII")); //convert byte to string
 
                         //System.out.println(row + " " + column + " " + newStringLetter); //debug
@@ -91,8 +88,6 @@ public class ClassifierData {
         } finally {
             iStream.close();
         }
-        
-
     }
 
     /**
@@ -159,6 +154,30 @@ public class ClassifierData {
             return (count == 0 && !isEmpty) ? 1 : count;
         } finally {
             iStream.close();
+        }
+    }
+    public void removeDataColumn(int colToBeRemoved)
+    {
+        String[][] newDataArray = new String[this.NumberOfDataRows][this.NumberOfDataColumns -1];
+        try {
+            if (this.dataArray != null && this.dataArray.length > 0 && this.dataArray[0].length > colToBeRemoved) {
+                newDataArray = new String[this.dataArray.length][this.dataArray[0].length - 1];
+                for (int i = 0; i < dataArray.length; i++) {
+                    int newColIdx = 0;
+                    for (int j = 0; j < this.dataArray[i].length; j++) {
+                        if (j != colToBeRemoved) {
+                            newDataArray[i][newColIdx] = this.dataArray[i][j];
+                            newColIdx++;
+                        }
+                    }
+                }
+            }
+            this.dataArray = newDataArray;
+            this.NumberOfDataColumns = this.NumberOfDataColumns -1;
+        }
+        catch (Exception e)
+        {
+            throw e;
         }
     }
 } 
