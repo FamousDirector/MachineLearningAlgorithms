@@ -7,6 +7,11 @@ public class KNNClassifier implements Classifier{
         this.k = k;
     }
 
+
+    public void reTrain(ClassifierData classifierData) {
+        //KNNClassifier(classifierData, this.k);
+    }
+
     public String classify(String[] featureArray ){
         //todo
         return null;
