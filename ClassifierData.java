@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  *
@@ -17,11 +20,17 @@ public class ClassifierData {
     public String[] classArray;
 
     public static void main(String[] args){
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
         try {
-            ClassifierData newClassifierData = new ClassifierData(samplePath,0);
-            ClassifierData subClassifierData = createSubsetOfClassifierData(newClassifierData,6,12);
-            ClassifierData largeCD = concatenateClassifierData(newClassifierData,subClassifierData);
+            HashMap<String,String> valuesToBeReplaced = new HashMap<String,String>();
+            valuesToBeReplaced.put("low","1");
+            valuesToBeReplaced.put("small","1");
+            valuesToBeReplaced.put("med","2");
+            valuesToBeReplaced.put("high","3");
+            valuesToBeReplaced.put("big","3");
+            valuesToBeReplaced.put("vhigh","4");
+
+            ClassifierData newClassifierData = new ClassifierData(samplePath,6,valuesToBeReplaced);
             System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,6 +98,11 @@ public class ClassifierData {
         } finally {
             iStream.close();
         }
+    }
+
+    public ClassifierData(String dataFilePath, int classRowPosition, HashMap valuesToBeReplaced) throws IOException{
+        this(dataFilePath,classRowPosition);
+        replacedatawithvalue(valuesToBeReplaced);
     }
 
     public ClassifierData(int numberOfDataColumns,String[][] dataArray, String[] dataClasses) {
@@ -202,8 +216,6 @@ public class ClassifierData {
         System.arraycopy(array3, 0, array3and4, 0, array3.length);
         System.arraycopy(array4, 0, array3and4, array3.length, array4.length);
 
-
-
         return new ClassifierData(classifierData1.getNumberOfDataColumns(),array1and2,array3and4);
     }
 
@@ -211,6 +223,17 @@ public class ClassifierData {
         String[] newC =  Arrays.copyOfRange(classifierData.getClassArray(),startRow,endRow);
         String[][] newD = Arrays.copyOfRange(classifierData.getDataArray(),startRow,endRow);
         return new ClassifierData(classifierData.getNumberOfDataColumns(),newD,newC);
+    }
+
+    private void replacedatawithvalue(HashMap valuesToBeReplaced){
+        for (int i = 0; i < getNumberOfDataRows(); i++) {
+            for (int j = 0; j < getNumberOfDataColumns(); j++) {
+                String value = dataArray[i][j];
+                if (valuesToBeReplaced.containsKey(value)){
+                    dataArray[i][j] = valuesToBeReplaced.get(value).toString();
+                }
+            }
+        }
     }
 
     public int getNumberOfDataRows() {
