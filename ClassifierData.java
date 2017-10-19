@@ -187,6 +187,12 @@ public class ClassifierData {
             throw e;
         }
     }
+    public static ClassifierData createSubsetOfClassifierData(ClassifierData classifierData, int startRow, int endRow){
+        String[] newC =  Arrays.copyOfRange(classifierData.getClassArray(),startRow,endRow);
+        String[][] newD = Arrays.copyOfRange(classifierData.getDataArray(),startRow,endRow);
+        return new ClassifierData(classifierData.getNumberOfDataColumns(),newD,newC);
+    }
+
     public int getNumberOfDataRows() {
         return NumberOfDataRows;
     }
