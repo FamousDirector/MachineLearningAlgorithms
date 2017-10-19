@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
@@ -19,12 +20,12 @@ public class ClassifierData {
         String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
         try {
             ClassifierData newClassifierData = new ClassifierData(samplePath,0);
-            newClassifierData.removeDataColumn(0);
+            ClassifierData subClassifierData = createSubsetOfClassifierData(newClassifierData,6,12);
+            ClassifierData largeCD = concatenateClassifierData(newClassifierData,subClassifierData);
             System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -187,6 +188,25 @@ public class ClassifierData {
             throw e;
         }
     }
+
+    public static ClassifierData concatenateClassifierData(ClassifierData classifierData1, ClassifierData classifierData2){
+        String[][] array1and2 = new String[classifierData1.getNumberOfDataRows() + classifierData2.getNumberOfDataRows()][];
+        String[][] array1 = classifierData1.getDataArray();
+        String[][] array2 = classifierData2.getDataArray();
+        System.arraycopy(array1, 0, array1and2, 0, array1.length);
+        System.arraycopy(array2, 0, array1and2, array1.length, array2.length);
+
+        String[] array3and4 = new String[classifierData1.getNumberOfDataRows() + classifierData2.getNumberOfDataRows()];
+        String[] array3 = classifierData1.getClassArray();
+        String[] array4 = classifierData2.getClassArray();
+        System.arraycopy(array3, 0, array3and4, 0, array3.length);
+        System.arraycopy(array4, 0, array3and4, array3.length, array4.length);
+
+
+
+        return new ClassifierData(classifierData1.getNumberOfDataColumns(),array1and2,array3and4);
+    }
+
     public static ClassifierData createSubsetOfClassifierData(ClassifierData classifierData, int startRow, int endRow){
         String[] newC =  Arrays.copyOfRange(classifierData.getClassArray(),startRow,endRow);
         String[][] newD = Arrays.copyOfRange(classifierData.getDataArray(),startRow,endRow);
