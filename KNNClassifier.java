@@ -1,6 +1,7 @@
 public class KNNClassifier implements Classifier{
-    private  ClassifierData classifierData;
-    private int k;
+    public ClassifierData classifierData;
+    public int k;
+
     public KNNClassifier(ClassifierData classifierData, int k)
     {
         this.classifierData = classifierData;
@@ -15,5 +16,21 @@ public class KNNClassifier implements Classifier{
     public String classify(String[] featureArray ){
         //todo
         return null;
+    }
+
+    public ClassifierData getClassifierData() {
+        return classifierData;
+    }
+
+    public void setClassifierData(ClassifierData classifierData) {
+        this.classifierData = classifierData;
+    }
+
+    public int getK() {
+        return k;
+    }
+
+    public void setK(int k) {
+        this.k = k;
     }
 }
