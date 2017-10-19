@@ -1,9 +1,27 @@
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class CrossValidation {
 
-    public static void main(String[] args){
     double mean;
     double variance;
     double standardDeviation;
+
+    public static void main(String[] args) {
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
+        try {
+            ClassifierData newClassifierData = new ClassifierData(samplePath, 0);
+            kFold(5, new KNNClassifier(newClassifierData, 1), newClassifierData,10);
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     public CrossValidation(double[] data) {
         this.mean = getMean(data);
@@ -48,9 +66,20 @@ public class CrossValidation {
         return new CrossValidation(errors);
     }
 
-    public static long kFold(int k, Classifier classifier){
-        long averageAccuracy = 0;
-        return averageAccuracy;
+    public static CrossValidation kFold(int k, Classifier classifier, ClassifierData classifierData, int totalReps) {
+        double[] meanArray = new double[totalReps];
+        double [] standardDeviationArray = new double[totalReps];
+        double [] varianceArray = new double[totalReps];
+
+        for (int i = 0; i < totalReps; i++) {
+            CrossValidation cv = kFold(k, classifier, classifierData);
+            meanArray[i] = cv.mean;
+            standardDeviationArray[i] = cv.standardDeviation;
+            varianceArray[i] = cv.variance;
+        }
+
+        CrossValidation crossValidation = new CrossValidation(getMean(meanArray),getMean(standardDeviationArray),getMean(varianceArray));
+        return crossValidation;
     }
 
     private static double getMean(double[] data) {
