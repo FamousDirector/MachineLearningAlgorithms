@@ -5,6 +5,17 @@ public class CrossValidation {
     double variance;
     double standardDeviation;
 
+    public CrossValidation(double[] data) {
+        this.mean = getMean(data);
+        this.standardDeviation = getStdDev(data);
+        this.variance = getVariance(data);
+    }
+    public CrossValidation(double mean, double standardDeviation, double variance) {
+        this.mean = mean;
+        this.standardDeviation = standardDeviation;
+        this.variance = variance;
+    }
+
 
     }
 
