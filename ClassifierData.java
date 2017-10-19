@@ -90,6 +90,13 @@ public class ClassifierData {
         }
     }
 
+    public ClassifierData(int numberOfDataColumns,String[][] dataArray, String[] dataClasses) {
+        this.NumberOfDataRows = dataArray.length;
+        this.NumberOfDataColumns = numberOfDataColumns;
+        this.dataArray = dataArray;
+        this.classArray = dataClasses;
+    }
+
     /**
      * Returns the number of data rows in the file specified by the @param dataFilePath
      * @param dataFilePath a string that is the path to the data file
