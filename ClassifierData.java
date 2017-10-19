@@ -180,4 +180,35 @@ public class ClassifierData {
             throw e;
         }
     }
+    public int getNumberOfDataRows() {
+        return NumberOfDataRows;
+    }
+
+    public void setNumberOfDataRows(int numberOfDataRows) {
+        NumberOfDataRows = numberOfDataRows;
+    }
+
+    public int getNumberOfDataColumns() {
+        return NumberOfDataColumns;
+    }
+
+    public void setNumberOfDataColumns(int numberOfDataColumns) {
+        NumberOfDataColumns = numberOfDataColumns;
+    }
+
+    public String[][] getDataArray() {
+        return dataArray;
+    }
+
+    public void setDataArray(String[][] dataArray) {
+        this.dataArray = dataArray;
+    }
+
+    public String[] getClassArray() {
+        return classArray;
+    }
+
+    public void setClassArray(String[] classArray) {
+        this.classArray = classArray;
+    }
 } 
