@@ -10,7 +10,7 @@ public class KNNClassifier implements Classifier{
 
 
     public void reTrain(ClassifierData classifierData) {
-        //KNNClassifier(classifierData, this.k);
+        this.classifierData = classifierData;
     }
 
     public String classify(String[] featureArray ){
