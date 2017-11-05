@@ -1,4 +1,4 @@
-import java.util.Arrays;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparing;
@@ -27,7 +27,7 @@ public class KNNClassifier implements Classifier{
         //compute distances
         double distanceData[] = new double[this.classifierData.getNumberOfDataRows()];
         for (int i = 0; i < this.classifierData.getNumberOfDataRows(); i++) {
-            distanceData[i] = computeMinkowskiDistance(this.classifierData.getDataArray()[i],this.classifierData.getDataArray()[i],minkowskiDistanceP);
+            distanceData[i] = computeMinkowskiDistance(featureArray,this.classifierData.getDataArray()[i],minkowskiDistanceP);
         }
 
         double normalizedDistanceData[] = normalizeDistance(distanceData);
@@ -35,9 +35,14 @@ public class KNNClassifier implements Classifier{
         //find k lowest distances
         int[] indiceOfAscendingValue =  getAscendingValueIndice(normalizedDistanceData);
 
-        //TODO get k of closet classes and rank em
+        String[] arrayOfClosestClasses = new String[getK()];
 
-        return null;
+        //create array of k lowest distances
+        for (int i = 0; i < getK(); i++) {
+            arrayOfClosestClasses[i] = classifierData.getClassArray()[indiceOfAscendingValue[i]];
+        }
+
+        return returnMostCommonClass(arrayOfClosestClasses);
     }
 
     public ClassifierData getClassifierData() {
@@ -56,8 +61,7 @@ public class KNNClassifier implements Classifier{
         this.k = k;
     }
 
-    private static double computeMinkowskiDistance(String[] array1, String[] array2, double p)
-    {
+    private static double computeMinkowskiDistance(String[] array1, String[] array2, double p){
         //hamming distance
         if (p <= 0)
         {
@@ -80,8 +84,7 @@ public class KNNClassifier implements Classifier{
         }
     }
 
-    private static double computeHammingDistanceFromArray(String[] array1, String[] array2)
-    {
+    private static double computeHammingDistanceFromArray(String[] array1, String[] array2)    {
         double sum = 0;
         for (int i = 0; i < array1.length; i++) {
             sum = sum + computeHammingDistance(array1[i],array2[i]);
@@ -106,14 +109,13 @@ public class KNNClassifier implements Classifier{
         return result;
     }
 
-    private static double[] normalizeDistance(double [] distances)
-    {
+    private static double[] normalizeDistance(double [] distances)    {
         double[] normalizedDistances = new double[distances.length];
         double max = 0;
         double min = Double.POSITIVE_INFINITY;
 
         //find min and max
-        for (int i = 1; i < distances.length; i++) {
+        for (int i = 0; i < distances.length; i++) {
             if (distances[i] > max) {
                 max = distances[i];
             }
@@ -123,7 +125,7 @@ public class KNNClassifier implements Classifier{
             }
         }
 
-        for (int i = 1; i < distances.length; i++) {
+        for (int i = 0; i < distances.length; i++) {
             normalizedDistances[i] = (distances[i] - min) / (max - min);
         }
         return normalizedDistances;
@@ -132,8 +134,7 @@ public class KNNClassifier implements Classifier{
         return s != null && s.matches("[-+]?\\d*\\.?\\d+");
     }
 
-    private static int[] getAscendingValueIndice(double[] originalArray)
-    {
+    private static int[] getAscendingValueIndice(double[] originalArray){
         int len = originalArray.length;
 
         double[] sortedCopy = originalArray.clone();
@@ -145,8 +146,30 @@ public class KNNClassifier implements Classifier{
         // Go through the original array: for the same index, fill the position where the
         // corresponding number is in the sorted array in the indices array
         for (int index = 0; index < len; index++)
-            indices[index] = Arrays.binarySearch(sortedCopy, originalArray[index]);
+            indices[Arrays.binarySearch(sortedCopy, originalArray[index])] = index;
 
         return indices;
+    }
+
+    private static String returnMostCommonClass(String[] arrayOfClasses){
+        int count = 1, tempCount;
+        String popular = arrayOfClasses[0];
+        String temp = "";
+        for (int i = 0; i < (arrayOfClasses.length - 1); i++)
+        {
+            temp = arrayOfClasses[i];
+            tempCount = 0;
+            for (int j = 1; j < arrayOfClasses.length; j++)
+            {
+                if (temp == arrayOfClasses[j])
+                    tempCount++;
+            }
+            if (tempCount > count)
+            {
+                popular = temp;
+                count = tempCount;
+            }
+        }
+        return popular;
     }
 }
