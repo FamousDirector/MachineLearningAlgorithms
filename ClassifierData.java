@@ -29,6 +29,8 @@ public class ClassifierData {
             valuesToBeReplaced.put("high","3");
             valuesToBeReplaced.put("big","3");
             valuesToBeReplaced.put("vhigh","4");
+            valuesToBeReplaced.put("5more","5.5");
+            valuesToBeReplaced.put("more","5.5");
 
             ClassifierData newClassifierData = new ClassifierData(samplePath,6,valuesToBeReplaced);
             System.out.println();
@@ -55,16 +57,17 @@ public class ClassifierData {
             int column = 0;
             int dataColumn = 0;
             byte[] c = new byte[1024];
+            byte prevChar = '0';
             int readChars;
             while ((readChars = iStream.read(c)) != -1) { // while there is a non empty line in the file
-                charInLineLoop: for (int i = 0; i < readChars; ++i) { //for every byte in the line
+                for (int i = 0; i < readChars; ++i) { //for every byte in the line
                     if (c[i] == '\n') { //if end of line
                         ++row;
                         column = 0;
                         dataColumn = 0;
                     }
-                    else if ((c[i] == ',' || c[i] == ' ') && i > 0) { //if column separator
-                        if (c[i-1] != ',' || c[i-1] != ' '){ //if this is a unique column separator
+                    else if ((c[i] == ',' || c[i] == ' ')) { //if column separator
+                        if (prevChar != ',' || prevChar != ' '){ //if this is a unique column separator
                             if (column != classRowPosition){
                                 ++dataColumn;
                             }
@@ -92,7 +95,9 @@ public class ClassifierData {
                                 }
                             }
                         }
+
                     }
+                    prevChar = c[i];
                 }
             }
         } finally {
