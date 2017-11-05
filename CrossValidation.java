@@ -56,7 +56,7 @@ public class CrossValidation {
             for (int j = 0; j < testSet.getDataArray().length; j++) {
                 String guessedClass = classifier.classify(testSetData[j]);
                 String actualClass = testSetClass[j];
-                if (guessedClass != actualClass) {
+                if (!guessedClass.equals(actualClass)) {
                     ++incorrectClassCount;
                 }
             }
