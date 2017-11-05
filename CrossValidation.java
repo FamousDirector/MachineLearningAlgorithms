@@ -39,8 +39,8 @@ public class CrossValidation {
         int numberOfDataPointsPerK = classifierData.getDataArray().length / k;
 
         for (int i = 0; i < k; i++) {
-            int lowerBound = k * numberOfDataPointsPerK;
-            int upperBound = (k + 1) * numberOfDataPointsPerK;
+            int lowerBound = i * numberOfDataPointsPerK;
+            int upperBound = (i + 1) * numberOfDataPointsPerK;
 
             ClassifierData lowerTrainingSet = ClassifierData.createSubsetOfClassifierData(classifierData, 0, lowerBound);
             ClassifierData upperTrainingSet = ClassifierData.createSubsetOfClassifierData(classifierData, upperBound, classifierData.getDataArray().length);
