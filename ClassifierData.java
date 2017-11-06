@@ -5,10 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  *
@@ -271,5 +268,25 @@ public class ClassifierData {
 
     public void setClassArray(String[] classArray) {
         this.classArray = classArray;
+    }
+
+    public void shuffle() {
+        Random rnd = new Random();
+        int size = this.getNumberOfDataRows();
+        for (int i = size; i > 1; i--) {
+            swapRow(i - 1, rnd.nextInt(i));
+        }
+    }
+
+    private void swapRow(int i, int j) {
+        //swap data rows
+        String[] tmp1 = this.dataArray[i];
+        this.dataArray[i] = this.dataArray[j];
+        this.dataArray[j] = tmp1;
+
+        //swap class rows
+        String tmp2 = this.classArray[i];
+        this.classArray[i] = this.classArray[j];
+        this.classArray[j] = tmp2;
     }
 } 
