@@ -14,8 +14,10 @@ public class CrossValidation {
     public static void main(String[] args) {
         String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
         try {
-            ClassifierData newClassifierData = new ClassifierData(samplePath, 0);
-            kFold(5, new KNNClassifier(newClassifierData, 1), newClassifierData,10);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,2000);
+            KNNClassifier knn = new KNNClassifier(partialDataset, 11);
+            CrossValidation cv = kFold(3, knn, partialDataset,3);
             System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
