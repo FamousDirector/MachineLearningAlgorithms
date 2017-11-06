@@ -1,6 +1,7 @@
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,8 +20,6 @@ public class CrossValidation {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     public CrossValidation(double[] data) {
@@ -37,6 +36,9 @@ public class CrossValidation {
     public static CrossValidation kFold(int k, Classifier classifier, ClassifierData classifierData) {
         double[] errors = new double[k];
         int numberOfDataPointsPerK = classifierData.getDataArray().length / k;
+
+        //shuffle data
+        classifierData.shuffle();
 
         for (int i = 0; i < k; i++) {
             int lowerBound = i * numberOfDataPointsPerK;
