@@ -60,10 +60,8 @@ public class CrossValidation {
                     ++incorrectClassCount;
                 }
             }
-            errors[k] = incorrectClassCount / testSet.getDataArray().length;
+            errors[i] = (double) incorrectClassCount / testSet.getDataArray().length;
         }
-
-
         return new CrossValidation(errors);
     }
 
