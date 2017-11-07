@@ -238,6 +238,35 @@ public class ClassifierData {
         }
     }
 
+    public boolean isDataNumeric()
+    {
+        for (int i = 0; i < getNumberOfDataRows(); i++) {
+            for (int j = 0; j < getNumberOfDataColumns(); j++) {
+                if(!isNumeric(getDataArray()[i][j]))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean isDataNumeric(int column)
+    {
+        for (int i = 0; i < getNumberOfDataRows(); i++) {
+            if(!isNumeric(getDataArray()[i][column]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private static boolean isNumeric(String s) {
+        return s != null && s.matches("[-+]?\\d*\\.?\\d+");
+    }
+
     public int getNumberOfDataRows() {
         return NumberOfDataRows;
     }
