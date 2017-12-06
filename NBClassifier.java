@@ -3,6 +3,19 @@ import java.util.Map;
 
 public class NBClassifier implements Classifier {
 
+    public static void main(String[] args) {
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
+        try {
+            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,100);
+            NBClassifier nb = new NBClassifier(partialDataset);
+            CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset,3);
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     ClassifierData data;
     public NBClassifier(ClassifierData classifierData)
     {
