@@ -14,22 +14,34 @@ public class ClassifierData {
     public int NumberOfDataRows;
     public int NumberOfDataColumns;
     public String[][] dataArray;
+    public String[][] flippedDataArray;
     public String[] classArray;
+    public HashSet<String> listOfClasses = new HashSet<>();
+    private String missingValueString = "?";
 
     public static void main(String[] args){
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
-        try {
-            HashMap<String,String> valuesToBeReplaced = new HashMap<String,String>();
-            valuesToBeReplaced.put("low","1");
-            valuesToBeReplaced.put("small","1");
-            valuesToBeReplaced.put("med","2");
-            valuesToBeReplaced.put("high","3");
-            valuesToBeReplaced.put("big","3");
-            valuesToBeReplaced.put("vhigh","4");
-            valuesToBeReplaced.put("5more","5.5");
-            valuesToBeReplaced.put("more","5.5");
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
+//        try {
+//            HashMap<String,String> valuesToBeReplaced = new HashMap<String,String>();
+//            valuesToBeReplaced.put("low","1");
+//            valuesToBeReplaced.put("small","1");
+//            valuesToBeReplaced.put("med","2");
+//            valuesToBeReplaced.put("high","3");
+//            valuesToBeReplaced.put("big","3");
+//            valuesToBeReplaced.put("vhigh","4");
+//            valuesToBeReplaced.put("5more","5.5");
+//            valuesToBeReplaced.put("more","5.5");
+//
+//            ClassifierData newClassifierData = new ClassifierData(samplePath,6,valuesToBeReplaced);
+//            System.out.println();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
-            ClassifierData newClassifierData = new ClassifierData(samplePath,6,valuesToBeReplaced);
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+        try {
+
+            ClassifierData newClassifierData = new ClassifierData(samplePath,6);
             System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,12 +52,14 @@ public class ClassifierData {
      *
      * Constructs a 2 dimensional array of values based upon the specified text file from @param dataFilePath
      * @param dataFilePath the path to the data file that
+     * @param classRowPosition the zero indexed row of the class data
      * @throws IOException
      */
     public ClassifierData(String dataFilePath, int classRowPosition) throws IOException{
         this.NumberOfDataRows = countRows(dataFilePath);
         this.NumberOfDataColumns = countColumns(dataFilePath);
         this.dataArray = new String [NumberOfDataRows][NumberOfDataColumns];
+        this.flippedDataArray = new String [NumberOfDataColumns][NumberOfDataRows];
         this.classArray = new String [NumberOfDataRows];
 
         InputStream iStream = new BufferedInputStream(new FileInputStream(dataFilePath));
@@ -74,7 +88,7 @@ public class ClassifierData {
                         String newStringLetter = (new String(new byte[]{ c[i] }, "US-ASCII")); //convert byte to string
 
                         //System.out.println(row + " " + column + " " + newStringLetter); //debug
-                        if(newStringLetter.matches("[A-Za-z0-9]+")) { //ensure value is alpha numeric
+                        if(newStringLetter.matches("[A-Za-z0-9"+this.missingValueString +"]+")) { //ensure value is alpha numeric
                             if (column == classRowPosition) {
                                 if (this.classArray[row] == null){
                                     this.classArray[row] = newStringLetter; //add value to array
@@ -100,11 +114,13 @@ public class ClassifierData {
         } finally {
             iStream.close();
         }
+        //remove this.missingValueString
+        replaceEmptyVaules();
     }
 
     public ClassifierData(String dataFilePath, int classRowPosition, HashMap valuesToBeReplaced) throws IOException{
         this(dataFilePath,classRowPosition);
-        replacedatawithvalue(valuesToBeReplaced);
+        replaceDataWithValue(valuesToBeReplaced);
     }
 
     public ClassifierData(int numberOfDataColumns,String[][] dataArray, String[] dataClasses) {
@@ -227,7 +243,7 @@ public class ClassifierData {
         return new ClassifierData(classifierData.getNumberOfDataColumns(),newD,newC);
     }
 
-    private void replacedatawithvalue(HashMap valuesToBeReplaced){
+    private void replaceDataWithValue(HashMap valuesToBeReplaced){
         for (int i = 0; i < getNumberOfDataRows(); i++) {
             for (int j = 0; j < getNumberOfDataColumns(); j++) {
                 String value = dataArray[i][j];
@@ -236,6 +252,53 @@ public class ClassifierData {
                 }
             }
         }
+    }
+
+    private void replaceEmptyVaules(){
+
+        for (int i = 0; i < classArray.length; i++) {
+            this.listOfClasses.add(classArray[i]);
+        }
+
+        HashMap<String, String[]> averageValueMap = new HashMap<>();
+
+        this.flippedDataArray = new String[getNumberOfDataColumns()][getNumberOfDataRows()];
+
+        //flips data array so it is [column][row] not [row][col]
+        for (int j = 0; j < getNumberOfDataColumns(); j++) {
+            for (int i = 0; i < getNumberOfDataRows(); i++) {
+                flippedDataArray[j][i] = dataArray[i][j];
+            }
+        }
+
+        //fills map with most common values per class
+        for(String label: this.listOfClasses) {
+            String[] avgValues = new String[getNumberOfDataColumns()];
+            for (int i = 0; i < getNumberOfDataColumns(); i++) {
+                avgValues[i] = returnMostCommonStringPerClass(flippedDataArray[i],label);
+            }
+            averageValueMap.put(label,avgValues);
+        }
+
+        //replaces missingValueString with most common value of class
+        for (int i = 0; i < getNumberOfDataRows(); i++) {
+            for (int j = 0; j < getNumberOfDataColumns(); j++) {
+                String value = dataArray[i][j];
+                if(value.equals(this.missingValueString))
+                {
+                    String[] values = averageValueMap.get(classArray[i]);
+                    values[j] = dataArray[i][j];
+                }
+            }
+        }
+
+        //flips data array with corrected data
+        for (int j = 0; j < getNumberOfDataColumns(); j++) {
+            for (int i = 0; i < getNumberOfDataRows(); i++) {
+                flippedDataArray[j][i] = dataArray[i][j];
+            }
+        }
+
     }
 
     public boolean isDataNumeric()
@@ -317,5 +380,58 @@ public class ClassifierData {
         String tmp2 = this.classArray[i];
         this.classArray[i] = this.classArray[j];
         this.classArray[j] = tmp2;
+    }
+
+    private static String returnMostCommonString(String[] arrayOfClasses){
+        int count = 1, tempCount;
+        String popular = arrayOfClasses[0];
+        String temp = "";
+        for (int i = 0; i < (arrayOfClasses.length - 1); i++)
+        {
+            temp = arrayOfClasses[i];
+            tempCount = 0;
+            for (int j = 1; j < arrayOfClasses.length; j++)
+            {
+                if (temp.equals(arrayOfClasses[j]))
+                    tempCount++;
+            }
+            if (tempCount > count)
+            {
+                popular = temp;
+                count = tempCount;
+            }
+        }
+        return popular;
+    }
+
+    private String returnMostCommonStringPerClass(String[] arrayOfClasses, String classLabel){
+        int count = 0, tempCount = 0;
+        String popular = "";
+        String temp = "";
+        HashSet<String> evaluatedValues = new HashSet<>();
+
+        for (int i = 0; i < (arrayOfClasses.length); i++)
+        {
+            temp = arrayOfClasses[i];
+            if(temp.equals(this.missingValueString)) //ignore empty values
+                continue;
+            else if(!classLabel.equals(classArray[i])) //ignore wrong class
+                continue;
+            else if(evaluatedValues.contains(temp)) //avoid duplicate values
+                continue;
+            else {
+                evaluatedValues.add(temp);
+                tempCount = 0;
+                for (int j = i; j < arrayOfClasses.length; j++) {
+                    if (temp.equals(arrayOfClasses[j]))
+                        tempCount++;
+                }
+                if (tempCount > count) {
+                    popular = temp;
+                    count = tempCount;
+                }
+            }
+        }
+        return popular;
     }
 } 
