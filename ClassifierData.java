@@ -134,6 +134,15 @@ public class ClassifierData {
         this.flipDataArray();
     }
 
+    public ClassifierData getSingleRowDataset(int i)
+    {
+        String[][] dataArray = new String[getNumberOfDataRows()][1];
+        for (int j = 0; j < getNumberOfDataRows(); j++) {
+            dataArray [j][0] = flippedDataArray[i][j];
+        }
+        return new ClassifierData(1,dataArray,classArray);
+    }
+
     /**
      * Returns the number of data rows in the file specified by the @param dataFilePath
      * @param dataFilePath a string that is the path to the data file
