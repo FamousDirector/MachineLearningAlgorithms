@@ -1,10 +1,7 @@
-import com.sun.xml.internal.bind.v2.model.util.ArrayInfoUtil;
-
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -78,7 +75,7 @@ public class ClassifierData {
                         dataColumn = 0;
                     }
                     else if ((c[i] == ',' || c[i] == ' ')) { //if column separator
-                        if (prevChar != ',' || prevChar != ' '){ //if this is a unique column separator
+                        if (prevChar != ' '){ //if this is a unique column separator
                             if (column != classRowPosition){
                                 ++dataColumn;
                             }
@@ -88,7 +85,7 @@ public class ClassifierData {
                         String newStringLetter = (new String(new byte[]{ c[i] }, "US-ASCII")); //convert byte to string
 
                         //System.out.println(row + " " + column + " " + newStringLetter); //debug
-                        if(newStringLetter.matches("[A-Za-z0-9"+this.missingValueString +"]+")) { //ensure value is alpha numeric
+                        if(newStringLetter.matches("[A-Za-z0-9"+this.missingValueString +".]+")) { //ensure value is alpha numeric
                             if (column == classRowPosition) {
                                 if (this.classArray[row] == null){
                                     this.classArray[row] = newStringLetter; //add value to array
@@ -114,8 +111,13 @@ public class ClassifierData {
         } finally {
             iStream.close();
         }
+
+
+        getListOfClasses();
+        flipDataArray();
+
         //remove this.missingValueString
-        replaceEmptyVaules();
+        replaceEmptyVales();
     }
 
     public ClassifierData(String dataFilePath, int classRowPosition, HashMap valuesToBeReplaced) throws IOException{
@@ -128,6 +130,8 @@ public class ClassifierData {
         this.NumberOfDataColumns = numberOfDataColumns;
         this.dataArray = dataArray;
         this.classArray = dataClasses;
+        this.getListOfClasses();
+        this.flipDataArray();
     }
 
     /**
@@ -182,7 +186,7 @@ public class ClassifierData {
                         break;
                     }
                     else if ((c[i] == ',' || c[i] == ' ') && i > 0) {
-                        if (c[i-1] != ',' || c[i-1] != ' '){
+                        if (c[i-1] != ' '){
                             ++count;
                         }
                         
@@ -214,6 +218,7 @@ public class ClassifierData {
             }
             this.dataArray = newDataArray;
             this.NumberOfDataColumns = this.NumberOfDataColumns -1;
+            flipDataArray();
         }
         catch (Exception e)
         {
@@ -238,6 +243,8 @@ public class ClassifierData {
     }
 
     public static ClassifierData createSubsetOfClassifierData(ClassifierData classifierData, int startRow, int endRow){
+        if(endRow-startRow>classifierData.getNumberOfDataRows())
+            return classifierData;
         String[] newC =  Arrays.copyOfRange(classifierData.getClassArray(),startRow,endRow);
         String[][] newD = Arrays.copyOfRange(classifierData.getDataArray(),startRow,endRow);
         return new ClassifierData(classifierData.getNumberOfDataColumns(),newD,newC);
@@ -254,22 +261,9 @@ public class ClassifierData {
         }
     }
 
-    private void replaceEmptyVaules(){
-
-        for (int i = 0; i < classArray.length; i++) {
-            this.listOfClasses.add(classArray[i]);
-        }
+    private void replaceEmptyVales(){
 
         HashMap<String, String[]> averageValueMap = new HashMap<>();
-
-        this.flippedDataArray = new String[getNumberOfDataColumns()][getNumberOfDataRows()];
-
-        //flips data array so it is [column][row] not [row][col]
-        for (int j = 0; j < getNumberOfDataColumns(); j++) {
-            for (int i = 0; i < getNumberOfDataRows(); i++) {
-                flippedDataArray[j][i] = dataArray[i][j];
-            }
-        }
 
         //fills map with most common values per class
         for(String label: this.listOfClasses) {
@@ -293,19 +287,33 @@ public class ClassifierData {
         }
 
         //flips data array with corrected data
+        flipDataArray();
+
+    }
+
+    private void getListOfClasses() {
+        for (int i = 0; i < classArray.length; i++) {
+            this.listOfClasses.add(classArray[i]);
+        }
+    }
+
+    private void flipDataArray() {
+        this.flippedDataArray = new String[getNumberOfDataColumns()][getNumberOfDataRows()];
+
+        //flips data array so it is [column][row] not [row][col]
         for (int j = 0; j < getNumberOfDataColumns(); j++) {
             for (int i = 0; i < getNumberOfDataRows(); i++) {
                 flippedDataArray[j][i] = dataArray[i][j];
             }
         }
-
     }
 
     public boolean isDataNumeric()
     {
         for (int i = 0; i < getNumberOfDataRows(); i++) {
             for (int j = 0; j < getNumberOfDataColumns(); j++) {
-                if(!isNumeric(getDataArray()[i][j]))
+                String s = dataArray[i][j];
+                if(!isNumeric(s))
                 {
                     return false;
                 }
@@ -325,9 +333,18 @@ public class ClassifierData {
         return true;
     }
 
+    public static double[] makeDataNumeric(String[] column)
+    {
+        double[] newCol = new double[column.length];
+        for (int i = 0; i < column.length; i++) {
+            newCol[i] = Double.parseDouble(column[i]);
+        }
+        return newCol;
+    }
+
 
     private static boolean isNumeric(String s) {
-        return s != null && s.matches("[-+]?\\d*\\.?\\d+");
+        return s != null && s.matches("\\d*\\.?\\d*");
     }
 
     public int getNumberOfDataRows() {
