@@ -53,6 +53,10 @@ public class IDThreeClassifier implements Classifier {
         reTrain(data);
     }
 
+    public Classifier clone(ClassifierData data) {
+        return new IDThreeClassifier(data,this.stopEarly);
+    }
+
     public void createTree(ClassifierData classifierData, int maxDepth) {
         this.maxDepth = maxDepth;
         createTree(classifierData);
@@ -82,7 +86,7 @@ public class IDThreeClassifier implements Classifier {
         }
     }
 
-    public void createTree(ClassifierData classifierData) {
+    private void createTree(ClassifierData classifierData) {
         this.data = classifierData;
         this.tree = new DecisionNode();
     }
