@@ -4,17 +4,43 @@ import java.util.HashSet;
 public class NBClassifier implements Classifier {
 
     public static void main(String[] args) {
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+        //continuous test
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10000);
-            partialDataset.removeDataColumn(0);
-            NBClassifier nb = new NBClassifier(partialDataset);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 100);
+//            partialDataset.removeDataColumn(0);
+            NBClassifier nb = new NBClassifier(partialDataset,false);
             CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset, 5);
             System.out.println(cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //discrete test
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+//        try {
+//            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+//            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10000);
+//            partialDataset.removeDataColumn(0);
+//            NBClassifier nb = new NBClassifier(partialDataset,true);
+//            CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset, 5);
+//            System.out.println(cv.mean);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        //simple test
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
+//        try {
+//            ClassifierData fullDataset = new ClassifierData(samplePath, 4);
+//            fullDataset.removeDataColumn(0);
+//            NBClassifier nb = new NBClassifier(fullDataset);
+//            String c = nb.classify(new String[]{"Sunny","No","Rich"});
+//            System.out.println(c);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     ClassifierData data;
@@ -98,23 +124,19 @@ public class NBClassifier implements Classifier {
 
                 if (isDiscrete) {
                     String attr = featureArray[i];
-                    if (discreteProbabilityMap.get(label).get(i).containsValue(attr)) {
-                        double prob = discreteProbabilityMap.get(label).get(i).get(attr);
+                    double prob = discreteProbabilityMap.get(label).get(i).getOrDefault(attr,0.0);
                         newProb = newProb * prob;
-                    } else //attribute never seen with that class
-                    {
-                        newProb = 0;
-                        break;
-                    }
+
                 } else {
                     double val = Double.parseDouble(featureArray[i]);
                     double prob = continuousProbabilityMap.get(label).get(i).pdf(val);
                     newProb = newProb * prob;
                 }
             }
-            if (highestProb < newProb)
+            if (highestProb < newProb) {
                 likelyClass = label;
-            highestProb = newProb;
+                highestProb = newProb;
+            }
         }
         return likelyClass;
     }
