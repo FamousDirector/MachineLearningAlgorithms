@@ -1,4 +1,5 @@
 public interface Classifier {
-    String classify(String[] featureArray );
-    void reTrain(ClassifierData classifierData);
+    public String classify(String[] featureArray );
+    public void reTrain(ClassifierData classifierData);
+    public Classifier clone(ClassifierData data);
 }

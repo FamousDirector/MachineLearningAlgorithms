@@ -107,6 +107,10 @@ public class NBClassifier implements Classifier {
         }
     }
 
+    public Classifier clone(ClassifierData data) {
+        return new NBClassifier(data,this.isDiscrete);
+    }
+
     public String classify(String[] featureArray) {
         double highestProb = -1;
         String likelyClass = "";

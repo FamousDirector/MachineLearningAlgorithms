@@ -77,6 +77,10 @@ public class KNNClassifier implements Classifier{
         this.k = k;
     }
 
+    public Classifier clone(ClassifierData data) {
+        return new KNNClassifier(data,this.k,this.minkowskiDistance);
+    }
+
     private static double computeMinkowskiDistance(String[] array1, String[] array2, double p){
         //hamming distance
         if (p <= 0)
