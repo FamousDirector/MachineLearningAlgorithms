@@ -11,7 +11,7 @@ public class NBClassifier implements Classifier {
 //            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1000);
 ////            partialDataset.removeDataColumn(0);
 //            NBClassifier nb = new NBClassifier(partialDataset,false);
-//            CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset, 5);
+//            CrossValidation cv = CrossValidation.kFold(5, nb, partialDataset, 10);
 //            System.out.println("Error = " + cv.mean);
 //        } catch (Exception e) {
 //            e.printStackTrace();
@@ -24,7 +24,7 @@ public class NBClassifier implements Classifier {
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1700);
 //            partialDataset.removeDataColumn(0);
             NBClassifier nb = new NBClassifier(partialDataset,true);
-            CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset, 5);
+            CrossValidation cv = CrossValidation.kFold(5, nb, partialDataset, 10);
             System.out.println("Error = " + cv.mean);
         } catch (Exception e) {
             e.printStackTrace();

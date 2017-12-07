@@ -9,8 +9,8 @@ public class KNNClassifier implements Classifier{
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 0);
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,1500);
-            KNNClassifier knn = new KNNClassifier(partialDataset,5);
-            CrossValidation cv = CrossValidation.kFold(3, knn, partialDataset,2);
+            KNNClassifier knn = new KNNClassifier(partialDataset,5,2.0);
+            CrossValidation cv = CrossValidation.kFold(5, knn, partialDataset,10);
             System.out.println("Error = " + cv.mean);
         } catch (Exception e) {
             e.printStackTrace();

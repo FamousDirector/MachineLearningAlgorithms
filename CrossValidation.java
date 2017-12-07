@@ -59,6 +59,14 @@ public class CrossValidation {
     }
 
     public static CrossValidation kFold(int k, Classifier classifier, ClassifierData classifierData, int totalReps) {
+
+        if(k != 5 || totalReps != 10)
+        {
+            System.out.println("!!! YOU ARE NOT USING REGULATED KFOLD !!!");
+            System.out.println("k=" + k + " reps=" + totalReps);
+
+        }
+
         double[] meanArray = new double[totalReps];
         double [] standardDeviationArray = new double[totalReps];
         double [] varianceArray = new double[totalReps];

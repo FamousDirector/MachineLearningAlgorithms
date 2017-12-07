@@ -18,7 +18,7 @@ public class IDThreeClassifier implements Classifier {
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10000);
             partialDataset.removeDataColumn(0);
             IDThreeClassifier id3 = new IDThreeClassifier(partialDataset,true);
-            CrossValidation cv = CrossValidation.kFold(3, id3, partialDataset, 5);
+            CrossValidation cv = CrossValidation.kFold(5, id3, partialDataset, 10);
             System.out.println(cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
