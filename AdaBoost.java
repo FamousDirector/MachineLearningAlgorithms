@@ -36,6 +36,25 @@ public class AdaBoost implements Classifier {
     }
     public void reTrain(ClassifierData classifierData) {
         this.data = classifierData;
+        int numberOfIterations = 0;
+        while (true){ //TODO some constraint
+            //get smallest weight to normalize
+            double smallestWeight = Double.MAX_VALUE;
+            for (int i = 0; i < rowWeights.size(); i++) {
+                if (rowWeights.get(i) < smallestWeight)
+                {
+                    smallestWeight = rowWeights.get(i);
+                }
+            }
+            //create data based on weights
+            //use same data multiple times according to weight
+
+            ClassifierData newData = new ClassifierData(null,null,null);
+            Classifier classifier = weakClassifier.clone(newData);
+            double errorRate = CrossValidation.kFold(2, classifier, newData, 5).mean;
+            setModelWeight(numberOfIterations,errorRate);
+            numberOfIterations++;
+        }
 
     }
 
