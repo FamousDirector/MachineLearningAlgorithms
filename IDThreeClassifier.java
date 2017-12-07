@@ -12,13 +12,13 @@ public class IDThreeClassifier implements Classifier {
     private boolean stopEarly = false;
 
     public static void main(String[] args) {
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 8);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10000);
-            partialDataset.removeDataColumn(0);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
+//            partialDataset.removeDataColumn(0);
             IDThreeClassifier id3 = new IDThreeClassifier(partialDataset,true);
-            CrossValidation cv = CrossValidation.kFold(5, id3, partialDataset, 10);
+            CrossValidation cv = CrossValidation.kFold(5, id3, fullDataset, 10);
             System.out.println(cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,24 +43,25 @@ public class IDThreeClassifier implements Classifier {
 
     public IDThreeClassifier(ClassifierData data, int maxDepth)
     {
-        reTrain(data,maxDepth);
+        this.stopEarly = false;
+        createTree(data,maxDepth);
     }
 
     public IDThreeClassifier(ClassifierData data, boolean stopEarly)
     {
         this.stopEarly = stopEarly;
-        reTrain(data,this.stopEarly);
+        reTrain(data);
     }
 
-    public void reTrain(ClassifierData classifierData, int maxDepth) {
+    public void createTree(ClassifierData classifierData, int maxDepth) {
         this.maxDepth = maxDepth;
-        reTrain(classifierData);
+        createTree(classifierData);
     }
 
-    public void reTrain(ClassifierData classifierData, boolean stopEarly) {
+    public void reTrain(ClassifierData classifierData) {
         if(!this.stopEarly)
         {
-            reTrain(classifierData);
+            createTree(classifierData);
         }
         else {
             double prevError = 2;
@@ -73,15 +74,15 @@ public class IDThreeClassifier implements Classifier {
                 IDThreeClassifier iDT = new IDThreeClassifier(classifierData,maxDepth);
                 CrossValidation cv = CrossValidation.kFold(2, iDT, classifierData, 5);
                 error = cv.mean;
-                System.out.println("Error " + error + " --- Depth " + maxDepth); //debug
+//                System.out.println("Error " + error + " --- Depth " + maxDepth); //debug
             }
 
             //once best depth is known
-            reTrain(classifierData,maxDepth-1);
+            createTree(classifierData,maxDepth-1);
         }
     }
 
-    public void reTrain(ClassifierData classifierData) {
+    public void createTree(ClassifierData classifierData) {
         this.data = classifierData;
         this.tree = new DecisionNode();
     }
