@@ -15,7 +15,7 @@ public class IDThreeClassifier implements Classifier {
         String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 8);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1000);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10000);
             partialDataset.removeDataColumn(0);
             IDThreeClassifier id3 = new IDThreeClassifier(partialDataset,true);
             CrossValidation cv = CrossValidation.kFold(3, id3, partialDataset, 5);
@@ -64,7 +64,7 @@ public class IDThreeClassifier implements Classifier {
         }
         else {
             double prevError = 2;
-            double error = 2;
+            double error = 1;
             maxDepth = 1;
             while (prevError > error)
             {
