@@ -20,6 +20,7 @@ public class KNNClassifier implements Classifier{
 
     public ClassifierData classifierData;
     public int k;
+    public double minkowskiDistance = 2;
 
     public KNNClassifier(ClassifierData classifierData, int k)
     {
@@ -27,20 +28,22 @@ public class KNNClassifier implements Classifier{
         this.k = k;
     }
 
+    public KNNClassifier(ClassifierData classifierData, int k, double minkowskiDistance)
+    {
+        this.classifierData = classifierData;
+        this.minkowskiDistance = minkowskiDistance;
+        this.k = k;
+    }
+
     public void reTrain(ClassifierData classifierData) {
         this.classifierData = classifierData;
     }
 
-
-    public String classify(String[] featureArray) {
-        return classify(featureArray, 2);
-    }
-
-    public String classify(String[] featureArray, double minkowskiDistanceP){
+    public String classify(String[] featureArray){
         //compute distances
         double distanceData[] = new double[this.classifierData.getNumberOfDataRows()];
         for (int i = 0; i < this.classifierData.getNumberOfDataRows(); i++) {
-            distanceData[i] = computeMinkowskiDistance(featureArray,this.classifierData.getDataArray()[i],minkowskiDistanceP);
+            distanceData[i] = computeMinkowskiDistance(featureArray,this.classifierData.getDataArray()[i],this.minkowskiDistance);
         }
 
         double normalizedDistanceData[] = normalizeDistance(distanceData);
