@@ -5,30 +5,30 @@ public class NBClassifier implements Classifier {
 
     public static void main(String[] args) {
         //continuous test
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
-        try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 100);
-//            partialDataset.removeDataColumn(0);
-            NBClassifier nb = new NBClassifier(partialDataset,false);
-            CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset, 5);
-            System.out.println(cv.mean);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        //discrete test
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-//            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10000);
-//            partialDataset.removeDataColumn(0);
-//            NBClassifier nb = new NBClassifier(partialDataset,true);
+//            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1000);
+////            partialDataset.removeDataColumn(0);
+//            NBClassifier nb = new NBClassifier(partialDataset,false);
 //            CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset, 5);
-//            System.out.println(cv.mean);
+//            System.out.println("Error = " + cv.mean);
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+
+        //discrete test
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
+        try {
+            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1700);
+//            partialDataset.removeDataColumn(0);
+            NBClassifier nb = new NBClassifier(partialDataset,true);
+            CrossValidation cv = CrossValidation.kFold(3, nb, partialDataset, 5);
+            System.out.println("Error = " + cv.mean);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         //simple test
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
@@ -54,20 +54,12 @@ public class NBClassifier implements Classifier {
     }
 
     public NBClassifier(ClassifierData classifierData, Boolean isDiscrete) {
-        reTrain(classifierData, isDiscrete);
+        this.isDiscrete = isDiscrete;
+        reTrain(classifierData);
     }
 
     public void reTrain(ClassifierData classifierData) {
-        if (classifierData.isDataNumeric())
-            reTrain(classifierData, false);
-        else
-            reTrain(classifierData, true);
-
-    }
-
-    public void reTrain(ClassifierData classifierData, Boolean isDiscrete) {
         this.data = classifierData;
-        this.isDiscrete = isDiscrete;
         if (!this.isDiscrete && !data.isDataNumeric()) {
             this.isDiscrete = true;
             System.out.println("Incorrect assumption, data is discrete");
