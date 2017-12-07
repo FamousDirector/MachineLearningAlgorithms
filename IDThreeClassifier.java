@@ -10,10 +10,10 @@ public class IDThreeClassifier implements Classifier {
     private DecisionNode tree;
 
     public static void main(String[] args) {
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data";
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 4);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10000);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 8);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 330);
             partialDataset.removeDataColumn(0);
             IDThreeClassifier id3 = new IDThreeClassifier(partialDataset);
             CrossValidation cv = CrossValidation.kFold(3, id3, partialDataset, 5);
@@ -50,9 +50,14 @@ public class IDThreeClassifier implements Classifier {
     public String classify(String [] features)
     {
         DecisionNode node = tree;
-        while (!node.isLeaf)
-        {
-            node = node.children.get(features[node.colToSplitOn]);
+        while (!node.isLeaf) {
+            if (node.children.containsKey(features[node.colToSplitOn])) {
+                node = node.children.get(features[node.colToSplitOn]);
+            } else //just take the next node
+            {
+                node = node.children.values().iterator().next();
+            }
+
         }
         return node.leafClass;
     }
