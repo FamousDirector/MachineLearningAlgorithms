@@ -66,4 +66,20 @@ public class AdaBoost implements Classifier {
             }
         }
         return bestGuess;
+    }
+
+    private void setModelWeight(int i, double errorRate)
+    {
+        this.modelWeights.put(i,Math.log((1-errorRate)/errorRate));
+    }
+
+    private double updateWeight(double w, double errorRate, boolean correctClassification)
+    {
+        if (!correctClassification)
+
+            return w * Math.exp(errorRate);
+        else
+                return w;
+    }
+
 }
