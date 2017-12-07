@@ -60,7 +60,11 @@ public class CrossValidation {
 
     public static CrossValidation kFold(int k, Classifier classifier, ClassifierData classifierData, int totalReps) {
 
-        if(k != 5 || totalReps != 10)
+        if((k == 2 || totalReps == 5))
+        {
+            //do nothing cause its stopEarly kfold
+        }
+        else if(k != 5 || totalReps != 10)
         {
             System.out.println("!!! YOU ARE NOT USING REGULATED KFOLD !!!");
             System.out.println("k=" + k + " reps=" + totalReps);
