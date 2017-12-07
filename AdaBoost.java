@@ -39,8 +39,31 @@ public class AdaBoost implements Classifier {
 
     }
 
-    public String classify(String[] featureArray) {
+    public Classifier clone(ClassifierData data) {
+        System.out.println("DON'T ADABOOST-ADABOOST");
         return null;
     }
 
+    public String classify(String[] featureArray) {
+        HashMap <String,Double> results = new HashMap<>();
+        //get results
+        for (int i = 0; i < weakClassifiers.size(); i++) {
+            Classifier classifier = weakClassifiers.get(i);
+            String guess = classifier.classify(featureArray);
+            if(!results.containsValue(guess))
+                results.put(guess,modelWeights.get(i));
+            else
+                results.replace(guess,results.get(guess) + modelWeights.get(i);
+        }
+        //take value with highest
+        String bestGuess = "";
+        double highestValue = -1;
+        for (String guess : results.keySet()){
+            if(results.get(guess)> highestValue)
+            {
+                highestValue = results.get(guess);
+                bestGuess = guess;
+            }
+        }
+        return bestGuess;
 }
