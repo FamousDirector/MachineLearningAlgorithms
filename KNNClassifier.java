@@ -27,10 +27,10 @@ public class KNNClassifier implements Classifier{
 
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,4000);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,1000);
 //            fullDataset.removeDataColumn(0);
-            KNNClassifier knn = new KNNClassifier(partialDataset,10,2.0);
-            CrossValidation cv = CrossValidation.kFold(3, knn, partialDataset,5);
+            KNNClassifier knn = new KNNClassifier(partialDataset,5,2.0);
+            CrossValidation cv = CrossValidation.kFold(5, knn, partialDataset,2);
             System.out.println("Error = " + cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
@@ -208,22 +208,20 @@ public class KNNClassifier implements Classifier{
         return indices;
     }
 
-    private static String returnMostCommonClass(String[] arrayOfClasses){
+    private String returnMostCommonClass(String[] arrayOfClasses){
         int count = -1, tempCount;
         String popular = arrayOfClasses[0];
-        String temp = "";
-        for (int i = 0; i < (arrayOfClasses.length - 1); i++)
+        for (String c : classifierData.listOfClasses)
         {
-            temp = arrayOfClasses[i];
             tempCount = 0;
             for (int j = 1; j < arrayOfClasses.length; j++)
             {
-                if (temp == arrayOfClasses[j])
+                if (c.equals(arrayOfClasses[j]))
                     tempCount++;
             }
             if (tempCount > count)
             {
-                popular = temp;
+                popular = c;
                 count = tempCount;
             }
         }
