@@ -4,6 +4,7 @@ import java.util.HashSet;
 public class NBClassifier implements Classifier {
 
     public static void main(String[] args) {
+        System.out.println("---Naive Bayes---");
         //continuous test
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
 //        try {
@@ -18,13 +19,11 @@ public class NBClassifier implements Classifier {
 //        }
 
         //discrete test
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1700);
-//            partialDataset.removeDataColumn(0);
-            NBClassifier nb = new NBClassifier(partialDataset,true);
-            CrossValidation cv = CrossValidation.kFold(5, nb, partialDataset, 10);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+            NBClassifier nb = new NBClassifier(fullDataset,true);
+            CrossValidation cv = CrossValidation.kFold(5, nb, fullDataset, 10);
             System.out.println("Error = " + cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
