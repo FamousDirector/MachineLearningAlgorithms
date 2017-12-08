@@ -4,6 +4,9 @@ import java.util.HashSet;
 public class NBClassifier implements Classifier {
 
     public static void main(String[] args) {
+        System.out.println("---NaiveBayes---");
+
+
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
