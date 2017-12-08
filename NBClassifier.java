@@ -4,7 +4,17 @@ import java.util.HashSet;
 public class NBClassifier implements Classifier {
 
     public static void main(String[] args) {
-        System.out.println("---Naive Bayes---");
+
+        System.out.println("---NaiveBayes---");
+
+
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
+
         //continuous test
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
 //        try {
@@ -19,7 +29,6 @@ public class NBClassifier implements Classifier {
 //        }
 
         //discrete test
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 0);
             NBClassifier nb = new NBClassifier(fullDataset,true);

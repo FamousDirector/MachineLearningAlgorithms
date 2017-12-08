@@ -12,14 +12,23 @@ public class IDThreeClassifier implements Classifier {
     private boolean stopEarly = false;
 
     public static void main(String[] args) {
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+        System.out.println("---ID3---");
+
+
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
+
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 0);
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
 //            partialDataset.removeDataColumn(0);
             IDThreeClassifier id3 = new IDThreeClassifier(partialDataset,false);
             CrossValidation cv = CrossValidation.kFold(5, id3, fullDataset, 10);
-            System.out.println(cv.mean);
+            System.out.println("Error: " +cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
         }
