@@ -6,27 +6,35 @@ import static java.util.Comparator.comparing;
 public class KNNClassifier implements Classifier{
     public static void main(String[] args){
         System.out.println("---KNN---");
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
-        try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-//            fullDataset.removeDataColumn(0);
-            KNNClassifier knn = new KNNClassifier(fullDataset,5,2);
-            CrossValidation cv = CrossValidation.kFold(2, knn, fullDataset,1);
-            System.out.println("Error = " + cv.mean);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
+
+
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-//            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,1500);
-//            KNNClassifier knn = new KNNClassifier(partialDataset,5,2.0);
-//            CrossValidation cv = CrossValidation.kFold(5, knn, partialDataset,10);
+////            fullDataset.removeDataColumn(0);
+//            KNNClassifier knn = new KNNClassifier(fullDataset,5,2);
+//            CrossValidation cv = CrossValidation.kFold(2, knn, fullDataset,1);
 //            System.out.println("Error = " + cv.mean);
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+
+        try {
+            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,4000);
+//            fullDataset.removeDataColumn(0);
+            KNNClassifier knn = new KNNClassifier(partialDataset,10,2.0);
+            CrossValidation cv = CrossValidation.kFold(3, knn, partialDataset,5);
+            System.out.println("Error = " + cv.mean);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -104,11 +112,11 @@ public class KNNClassifier implements Classifier{
             for (int i = 0; i < array1.length; i++) {
                 if (isNumeric(array1[i]) && isNumeric(array2[i]))
                 {
-                    double dif = Double.parseDouble(array1[i])-Double.parseDouble(array2[i]);
+                    double dif = Math.abs(Double.parseDouble(array1[i])-Double.parseDouble(array2[i]));
                     sum = sum + Math.pow(dif,p);
                 }else {
                     //do hamming distance if values are string
-                    sum = sum + Math.pow(computeHammingDistance(array1[i],array2[i]),p);
+                    sum = sum + computeHammingDistance(array1[i],array2[i]);
                 }
 
                 }
@@ -124,21 +132,38 @@ public class KNNClassifier implements Classifier{
         return sum;
     }
 
+    /**
+     * returns
+     * @param string1
+     * @param string2
+     * @return
+     */
     private static double computeHammingDistance(String string1, String string2) {
-        char[] s1 = string1.toCharArray();
-        char[] s2 = string2.toCharArray();
+        //true hamming distance
+//        char[] s1 = string1.toCharArray();
+//        char[] s2 = string2.toCharArray();
+//
+//        int minLength = Math.min(s1.length, s2.length);
+//        int maxLength = Math.max(s1.length, s2.length);
+//
+//        int result = 0;
+//        for (int i=0; i<minLength; i++) {
+//            if (s1[i] != s2[i]) result++;
+//        }
+//
+//        result += maxLength - minLength;
+//
+//        return result;
 
-        int minLength = Math.min(s1.length, s2.length);
-        int maxLength = Math.max(s1.length, s2.length);
-
-        int result = 0;
-        for (int i=0; i<minLength; i++) {
-            if (s1[i] != s2[i]) result++;
+        //not true hamming - just sees if they are equal
+        if(string1.equals(string2))
+        {
+            return 1.0;
         }
-
-        result += maxLength - minLength;
-
-        return result;
+        else
+        {
+            return 0.0;
+        }
     }
 
     private static double[] normalizeDistance(double [] distances)    {
