@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 
@@ -7,23 +8,45 @@ public class AdaBoost implements Classifier {
     HashMap<Integer,Double> rowWeights = new HashMap<>();
     HashMap<Integer,Double> modelWeights = new HashMap<>();
     HashMap <Integer,Classifier> weakClassifiers = new HashMap<>();
+    private int maxIterations;
 
 
     public static void main(String[] args) {
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
-//            partialDataset.removeDataColumn(0);
-            AdaBoost ada = new AdaBoost(partialDataset,new IDThreeClassifier(partialDataset,true));
+            ClassifierData fullDataset = new ClassifierData(samplePath, 4);
+            fullDataset.removeDataColumn(0);
+            AdaBoost ada = new AdaBoost(fullDataset,new NBClassifier(fullDataset,true));
             CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 10);
             System.out.println(cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+//        try {
+//            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+//            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
+////            partialDataset.removeDataColumn(0);
+//            AdaBoost ada = new AdaBoost(partialDataset,new IDThreeClassifier(partialDataset,false));
+//            CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 10);
+//            System.out.println(cv.mean);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
+
+    public AdaBoost(ClassifierData data, Classifier classifier, int maxIterations)
+    {
+        this.data = data;
+        this.weakClassifier = classifier;
+        this.maxIterations = maxIterations;
+        for (int i = 0; i < data.getNumberOfDataRows(); i++) {
+            rowWeights.put(i,1.0/data.getNumberOfDataRows());
+        }
+        reTrain(data);
+    }
 
     public AdaBoost(ClassifierData data, Classifier classifier)
     {
@@ -32,12 +55,35 @@ public class AdaBoost implements Classifier {
         for (int i = 0; i < data.getNumberOfDataRows(); i++) {
             rowWeights.put(i,1.0/data.getNumberOfDataRows());
         }
+
+        double prevError = 2;
+        double error = 1;
+        int iterations = 1;
+        while (prevError > error)
+        {
+            prevError = error;
+            AdaBoost ada = new AdaBoost(data,classifier,iterations);
+            CrossValidation cv = CrossValidation.kFold(2, ada, data, 5);
+            error = cv.mean;
+            System.out.println("Error " + error + " --- Depth " + iterations); //debug
+            iterations++;
+        }
+
+        //once best depth is known
+        maxIterations = iterations-1;
         reTrain(data);
+
     }
+
     public void reTrain(ClassifierData classifierData) {
+        //prepare data
         this.data = classifierData;
+        for (int i = 0; i < data.getNumberOfDataRows(); i++) {
+            rowWeights.put(i,1.0/data.getNumberOfDataRows());
+        }
+
         int numberOfIterations = 0;
-        while (true){ //TODO some constraint
+        while (numberOfIterations < maxIterations){ //early termination
             //get smallest weight to normalize
             double smallestWeight = Double.MAX_VALUE;
             for (int i = 0; i < rowWeights.size(); i++) {
@@ -47,13 +93,53 @@ public class AdaBoost implements Classifier {
                 }
             }
             //create data based on weights
+            ArrayList<String> newDataClasses= new ArrayList<>();
+            ArrayList<String[]> newDataArray = new ArrayList<>();
             //use same data multiple times according to weight
+            for (int i = 0; i < data.getNumberOfDataRows(); i++) {
+                int timesToReAdd = (int) Math.ceil(rowWeights.get(i)/smallestWeight);
+                for (int j = 0; j < timesToReAdd; j++) {
+                    newDataClasses.add(data.classArray[i]);
+                    newDataArray.add(data.dataArray[i]);
+                }
+            }
 
-            ClassifierData newData = new ClassifierData(null,null,null);
+            //create new ClassifierData
+
+            ClassifierData newData = new ClassifierData(data.getNumberOfDataColumns(),newDataArray.toArray(new String[newDataArray.size()][data.getNumberOfDataColumns()]),newDataClasses.toArray(new String[newDataClasses.size()]));
+
+            //prepare classifier
             Classifier classifier = weakClassifier.clone(newData);
-            double errorRate = CrossValidation.kFold(2, classifier, newData, 5).mean;
+
+            //test classifier
+            double incorrectSum = 0;
+            double totalSum = 0;
+            for (int i = 0; i < data.getNumberOfDataRows(); i++) {
+                String[] featureArray = data.getDataArray()[i];
+                if (classifier.classify(featureArray) != data.getClassArray()[i]) //correct classification
+                {
+                    incorrectSum += rowWeights.get(i);
+                }
+                totalSum += rowWeights.get(i);
+            }
+            double errorRate = incorrectSum/totalSum;
+
+            // set new row weights
+            for (int i = 0; i < data.getNumberOfDataRows(); i++) {
+                String[] featureArray = data.getDataArray()[i];
+                if (classifier.classify(featureArray) != data.getClassArray()[i]) //correct classification
+                {
+                    updateRowWeight(errorRate,i);
+                }
+            }
+
+            // set model weights
             setModelWeight(numberOfIterations,errorRate);
-            numberOfIterations++;
+
+            //add weak classifier to ensemble
+            weakClassifiers.put(numberOfIterations,classifier);
+
+            numberOfIterations++; //next
         }
 
     }
@@ -72,7 +158,7 @@ public class AdaBoost implements Classifier {
             if(!results.containsValue(guess))
                 results.put(guess,modelWeights.get(i));
             else
-                results.replace(guess,results.get(guess) + modelWeights.get(i);
+                results.replace(guess,results.get(guess) + modelWeights.get(i));
         }
         //take value with highest
         String bestGuess = "";
@@ -92,13 +178,9 @@ public class AdaBoost implements Classifier {
         this.modelWeights.put(i,Math.log((1-errorRate)/errorRate));
     }
 
-    private double updateWeight(double w, double errorRate, boolean correctClassification)
+    private void updateRowWeight(double errorRate,int row)
     {
-        if (!correctClassification)
-
-            return w * Math.exp(errorRate);
-        else
-                return w;
+        rowWeights.replace(row,rowWeights.get(row) * Math.exp(errorRate));
     }
 
 }
