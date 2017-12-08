@@ -18,13 +18,12 @@ public class NBClassifier implements Classifier {
 //        }
 
         //discrete test
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data";
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1700);
-//            partialDataset.removeDataColumn(0);
-            NBClassifier nb = new NBClassifier(partialDataset,true);
-            CrossValidation cv = CrossValidation.kFold(5, nb, partialDataset, 10);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 8);
+            fullDataset.removeDataColumn(0);
+            NBClassifier nb = new NBClassifier(fullDataset,true);
+            CrossValidation cv = CrossValidation.kFold(5, nb, fullDataset, 10);
             System.out.println("Error = " + cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,13 +66,13 @@ public class NBClassifier implements Classifier {
 
         //get data for each unique class
         for (String label : data.listOfClasses) {
-            int count = 0;
+            int labelCount = 0;
             for (int i = 0; i < data.classArray.length; i++) {
                 String c = data.classArray[i];
                 if (label.equals(c))
-                    count++;
+                    labelCount++;
             }
-            double priorProb = ((double) count) / data.classArray.length;
+            double priorProb = ((double) labelCount) / data.classArray.length;
             priorMap.put(label, priorProb);
 
             if (this.isDiscrete) {
@@ -84,13 +83,18 @@ public class NBClassifier implements Classifier {
                     HashMap<String, Double> attributeMap = new HashMap<>();
 
                     for (String attr : uniqueAttributes) {
-                        count = 0;
+                        int attrCount = 0;
+                        int classAndAttrCount =0;
                         for (int j = 0; j < col.length; j++) {
-                            if (attr.equals(col[j])) {
-                                count++;
+                            if(attr.equals(col[j]))
+                            {
+                                attrCount++;
+                                if (  label.equals(data.classArray[j])) {
+                                    classAndAttrCount++;
+                                }
                             }
                         }
-                        attributeMap.put(attr, ((double) count) / col.length);
+                        attributeMap.put(attr, ((double) classAndAttrCount) /attrCount);
                     }
                     columnAttributeMap.put(i, attributeMap);
                 }
