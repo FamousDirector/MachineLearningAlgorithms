@@ -235,6 +235,15 @@ public class ClassifierData {
         }
     }
 
+    public void removeDataColumns(int[] colsToBeRemoved)
+    {
+        Arrays.sort(colsToBeRemoved);
+        for (int i = 0; i < colsToBeRemoved.length; i++) {
+            removeDataColumn(colsToBeRemoved[i]-i);
+        }
+    }
+
+
     public static ClassifierData concatenateClassifierData(ClassifierData classifierData1, ClassifierData classifierData2){
         String[][] array1and2 = new String[classifierData1.getNumberOfDataRows() + classifierData2.getNumberOfDataRows()][];
         String[][] array1 = classifierData1.getDataArray();
