@@ -8,6 +8,8 @@ import java.util.*;
  *
  */
 public class ClassifierData {
+    private static final double MIN_ENTROPY = 0.25;
+
     public int NumberOfDataRows;
     public int NumberOfDataColumns;
     public String[][] dataArray;
@@ -126,7 +128,7 @@ public class ClassifierData {
     }
 
     public ClassifierData(String dataFilePath, int classRowPosition, boolean reduceDimensionality) throws IOException{
-        this(dataFilePath,classRowPosition,reduceDimensionality,0.0001);
+        this(dataFilePath,classRowPosition,reduceDimensionality,MIN_ENTROPY);
     }
 
 
@@ -137,6 +139,9 @@ public class ClassifierData {
             for (int i = 0; i < getNumberOfDataColumns(); i++) {
                 String[] col = flippedDataArray[i];
                 HashSet<String> values = new HashSet<>();
+                for (int j = 0; j < col.length; j++) {
+                    values.add(col[j]);
+                }
                 double total = 0;
                 for (String label : values) {
                     int count = 0;
