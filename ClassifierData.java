@@ -16,7 +16,7 @@ public class ClassifierData {
     public String[][] flippedDataArray;
     public String[] classArray;
     public HashSet<String> listOfClasses = new HashSet<>();
-    private String missingValueString = "?";
+    private static final String MISSING_VALUE_STRING = "?";
 
     public static void main(String[] args){
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
@@ -87,7 +87,7 @@ public class ClassifierData {
                         String newStringLetter = (new String(new byte[]{ c[i] }, "US-ASCII")); //convert byte to string
 
                         //System.out.println(row + " " + column + " " + newStringLetter); //debug
-                        if(newStringLetter.matches("[A-Za-z0-9"+this.missingValueString +".]+")) { //ensure value is alpha numeric
+                        if(newStringLetter.matches("[A-Za-z0-9"+this.MISSING_VALUE_STRING +".]+")) { //ensure value is alpha numeric
                             if (column == classRowPosition) {
                                 if (this.classArray[row] == null){
                                     this.classArray[row] = newStringLetter; //add value to array
@@ -118,7 +118,7 @@ public class ClassifierData {
         getListOfClasses();
         flipDataArray();
 
-        //remove this.missingValueString
+        //remove this.MISSING_VALUE_STRING
         replaceEmptyVales();
     }
 
@@ -328,14 +328,14 @@ public class ClassifierData {
             averageValueMap.put(label,avgValues);
         }
 
-        //replaces missingValueString with most common value of class
+        //replaces MISSING_VALUE_STRING with most common value of class
         for (int i = 0; i < getNumberOfDataRows(); i++) {
             for (int j = 0; j < getNumberOfDataColumns(); j++) {
                 String value = dataArray[i][j];
-                if(value.equals(this.missingValueString))
+                if(value.equals(this.MISSING_VALUE_STRING))
                 {
                     String[] values = averageValueMap.get(classArray[i]);
-                    values[j] = dataArray[i][j];
+                    dataArray[i][j] = values[j];
                 }
             }
         }
@@ -484,7 +484,7 @@ public class ClassifierData {
         for (int i = 0; i < (arrayOfClasses.length); i++)
         {
             temp = arrayOfClasses[i];
-            if(temp.equals(this.missingValueString)) //ignore empty values
+            if(temp.equals(this.MISSING_VALUE_STRING)) //ignore empty values
                 continue;
             else if(!classLabel.equals(classArray[i])) //ignore wrong class
                 continue;
