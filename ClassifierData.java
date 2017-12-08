@@ -125,6 +125,37 @@ public class ClassifierData {
         replaceDataWithValue(valuesToBeReplaced);
     }
 
+    public ClassifierData(String dataFilePath, int classRowPosition, boolean reduceDimensionality) throws IOException{
+        this(dataFilePath,classRowPosition,reduceDimensionality,0.0001);
+    }
+
+
+    public ClassifierData(String dataFilePath, int classRowPosition, boolean reduceDimensionality, double minentropy) throws IOException{
+        this(dataFilePath,classRowPosition);
+        if(reduceDimensionality){
+            ArrayList<Integer> toBeRemoved = new ArrayList<>();
+            for (int i = 0; i < getNumberOfDataColumns(); i++) {
+                String[] col = flippedDataArray[i];
+                HashSet<String> values = new HashSet<>();
+                double total = 0;
+                for (String label : values) {
+                    int count = 0;
+                    for (int j = 0; j < col.length; j++) {
+                        if (label.equals(col[j])) {
+                            count++;
+                        }
+                    }
+                    total += entropy(((double) count) / col.length);
+                }
+                if (total < minentropy){
+                    toBeRemoved.add(i);
+                }
+            }
+            removeDataColumns(toBeRemoved.toArray(new Integer[toBeRemoved.size()]));
+        }
+    }
+
+
     public ClassifierData(int numberOfDataColumns,String[][] dataArray, String[] dataClasses) {
         this.NumberOfDataRows = dataArray.length;
         this.NumberOfDataColumns = numberOfDataColumns;
@@ -235,7 +266,7 @@ public class ClassifierData {
         }
     }
 
-    public void removeDataColumns(int[] colsToBeRemoved)
+    public void removeDataColumns(Integer[] colsToBeRemoved)
     {
         Arrays.sort(colsToBeRemoved);
         for (int i = 0; i < colsToBeRemoved.length; i++) {
@@ -469,4 +500,11 @@ public class ClassifierData {
         }
         return popular;
     }
+
+    private static double entropy(double p) {
+        if (p == 0 || p == 1)
+            return 0;
+        return -p * (Math.log(p)/Math.log(2));
+    }
+
 } 
