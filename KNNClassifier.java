@@ -5,16 +5,28 @@ import static java.util.Comparator.comparing;
 
 public class KNNClassifier implements Classifier{
     public static void main(String[] args){
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
+        System.out.println("---KNN---");
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,1500);
-            KNNClassifier knn = new KNNClassifier(partialDataset,5,2.0);
-            CrossValidation cv = CrossValidation.kFold(5, knn, partialDataset,10);
+//            fullDataset.removeDataColumn(0);
+            KNNClassifier knn = new KNNClassifier(fullDataset,5,2);
+            CrossValidation cv = CrossValidation.kFold(2, knn, fullDataset,1);
             System.out.println("Error = " + cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
+//        try {
+//            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+//            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,1500);
+//            KNNClassifier knn = new KNNClassifier(partialDataset,5,2.0);
+//            CrossValidation cv = CrossValidation.kFold(5, knn, partialDataset,10);
+//            System.out.println("Error = " + cv.mean);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -172,7 +184,7 @@ public class KNNClassifier implements Classifier{
     }
 
     private static String returnMostCommonClass(String[] arrayOfClasses){
-        int count = 1, tempCount;
+        int count = -1, tempCount;
         String popular = arrayOfClasses[0];
         String temp = "";
         for (int i = 0; i < (arrayOfClasses.length - 1); i++)
