@@ -66,13 +66,13 @@ public class NBClassifier implements Classifier {
 
         //get data for each unique class
         for (String label : data.listOfClasses) {
-            int count = 0;
+            int labelCount = 0;
             for (int i = 0; i < data.classArray.length; i++) {
                 String c = data.classArray[i];
                 if (label.equals(c))
-                    count++;
+                    labelCount++;
             }
-            double priorProb = ((double) count) / data.classArray.length;
+            double priorProb = ((double) labelCount) / data.classArray.length;
             priorMap.put(label, priorProb);
 
             if (this.isDiscrete) {
@@ -83,13 +83,18 @@ public class NBClassifier implements Classifier {
                     HashMap<String, Double> attributeMap = new HashMap<>();
 
                     for (String attr : uniqueAttributes) {
-                        count = 0;
+                        int attrCount = 0;
+                        int classAndAttrCount =0;
                         for (int j = 0; j < col.length; j++) {
-                            if (attr.equals(col[j])) {
-                                count++;
+                            if(attr.equals(col[j]))
+                            {
+                                attrCount++;
+                                if (  label.equals(data.classArray[j])) {
+                                    classAndAttrCount++;
+                                }
                             }
                         }
-                        attributeMap.put(attr, ((double) count) / col.length);
+                        attributeMap.put(attr, ((double) classAndAttrCount) /attrCount);
                     }
                     columnAttributeMap.put(i, attributeMap);
                 }
