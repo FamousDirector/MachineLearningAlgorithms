@@ -12,7 +12,14 @@ public class IDThreeClassifier implements Classifier {
     private boolean stopEarly = false;
 
     public static void main(String[] args) {
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
+
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
+
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 6);
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
@@ -24,7 +31,6 @@ public class IDThreeClassifier implements Classifier {
             e.printStackTrace();
         }
 
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 4);
 //            fullDataset.removeDataColumn(0);

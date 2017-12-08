@@ -4,8 +4,14 @@ import java.util.HashSet;
 public class NBClassifier implements Classifier {
 
     public static void main(String[] args) {
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
+
         //continuous test
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data";
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
 //            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 1000);
@@ -18,7 +24,6 @@ public class NBClassifier implements Classifier {
 //        }
 
         //discrete test
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data";
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 8);
             fullDataset.removeDataColumn(0);
@@ -30,7 +35,6 @@ public class NBClassifier implements Classifier {
         }
 
         //simple test
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 4);
 //            fullDataset.removeDataColumn(0);
