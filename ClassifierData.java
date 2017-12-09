@@ -19,7 +19,7 @@ public class ClassifierData {
     private static final String MISSING_VALUE_STRING = "?";
 
     //for Adaboost
-    public HashMap<Integer, Double> rowWeights = new HashMap<>();
+    public LinkedList<Double> rowWeights = new LinkedList<>();
 
 
     public static void main(String[] args){
@@ -174,12 +174,12 @@ public class ClassifierData {
         this.flipDataArray();
     }
 
-    public ClassifierData(int numberOfDataColumns,String[][] dataArray, String[] dataClasses, HashMap<Integer, Double> rowWeights) { //for Adaboost
+    public ClassifierData(int numberOfDataColumns,String[][] dataArray, String[] dataClasses, LinkedList<Double> rowWeights) { //for Adaboost
         this.NumberOfDataRows = dataArray.length;
         this.NumberOfDataColumns = numberOfDataColumns;
         this.dataArray = dataArray;
-        this.classArray = dataClasses;
-        this.rowWeights = new HashMap<Integer,Double>(rowWeights);
+        this.classArray =  dataClasses;
+        this.rowWeights = (LinkedList<Double>) rowWeights.clone();
         this.getListOfClasses();
         this.flipDataArray();
     }

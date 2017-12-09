@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class AdaBoost implements Classifier {
 
@@ -37,9 +38,9 @@ public class AdaBoost implements Classifier {
 
     public Classifier weakClassifier;
     public ClassifierData data;
-    HashMap<Integer, Double> rowWeights = new HashMap<>();
-    HashMap<Integer, Double> modelWeights = new HashMap<>();
-    HashMap<Integer, Classifier> weakClassifiers = new HashMap<>();
+    LinkedList<Double> rowWeights = new LinkedList<>();
+    LinkedList<Double> modelWeights = new LinkedList<>();
+    LinkedList<Classifier> weakClassifiers = new LinkedList<>();
     private int maxIterations = 100;
     private int START_ITERATIONS = 100;
 
@@ -48,7 +49,7 @@ public class AdaBoost implements Classifier {
         this.weakClassifier = classifier;
         this.maxIterations = maxIterations;
         for (int i = 0; i < data.getNumberOfDataRows(); i++) {
-            rowWeights.put(i, 1.0 / data.getNumberOfDataRows());
+            rowWeights.add(i, 1.0 / data.getNumberOfDataRows());
         }
         reTrain(data);
     }
@@ -57,7 +58,7 @@ public class AdaBoost implements Classifier {
         this.data = data;
         this.weakClassifier = classifier;
         for (int i = 0; i < data.getNumberOfDataRows(); i++) {
-            rowWeights.put(i, 1.0 / data.getNumberOfDataRows());
+            rowWeights.add(i, 1.0 / data.getNumberOfDataRows());
         }
 
         double prevError = 2;
@@ -82,19 +83,17 @@ public class AdaBoost implements Classifier {
         //prepare data
         this.data = classifierData;
         for (int i = 0; i < data.getNumberOfDataRows(); i++) {
-            rowWeights.put(i, 1.0 / data.getNumberOfDataRows());
+            rowWeights.add(i, 1.0 / data.getNumberOfDataRows());
         }
 
         int numberOfIterations = 0;
         while (numberOfIterations < maxIterations) { //early termination
 
             //create new ClassifierData
-            ClassifierData newData = new ClassifierData(data.getNumberOfDataColumns(), data.getDataArray(), data.getClassArray(), rowWeights);
+            ClassifierData newData = new ClassifierData(data.getNumberOfDataColumns(), data.getDataArray(), data.getClassArray(), (LinkedList<Double>) rowWeights.clone());
 
             //prepare classifier
             Classifier classifier = weakClassifier.clone(newData);
-
-            CrossValidation cv = CrossValidation.kFold(2, classifier, newData, 5);
 
             //test classifier
             double incorrectSum = 0;
@@ -112,22 +111,24 @@ public class AdaBoost implements Classifier {
 //            System.out.println("Debug = " + errorRate + " Depth: " + numberOfIterations); //debug
 
             // set model weights
-            setModelWeight(numberOfIterations, errorRate);
+            double newModelWeight = Math.log((1 - errorRate) / errorRate) + Math.log(data.listOfClasses.size() - 1);
+            this.modelWeights.add(numberOfIterations, newModelWeight);
 
             // set new row weights
             for (int i = 0; i < data.getNumberOfDataRows(); i++) {
                 String[] featureArray = data.getDataArray()[i];
                 if (!classifier.classify(featureArray).equals(data.getClassArray()[i])) //incorrect classification
                 {
-                    updateRowWeight(modelWeights.get(numberOfIterations), i);
+                    double newRowWeight = rowWeights.get(i) * Math.exp(newModelWeight);
+                    rowWeights.set(i,newRowWeight);
                 }
             }
 
+            //add weak classifier to ensemble
+            weakClassifiers.add(classifier);
+
             //normalize weights
             normalizeRowWeights();
-
-            //add weak classifier to ensemble
-            weakClassifiers.put(numberOfIterations, classifier);
 
             numberOfIterations++; //next
         }
@@ -155,26 +156,19 @@ public class AdaBoost implements Classifier {
         double highestValue = -1;
         for (String guess : results.keySet()) {
             if (results.get(guess) > highestValue) {
-                highestValue = results.get(guess);
+                highestValue = results.getOrDefault(guess,-1.0);
                 bestGuess = guess;
             }
         }
         return bestGuess;
     }
 
-    private void setModelWeight(int i, double errorRate) {
-        this.modelWeights.put(i, Math.log((1 - errorRate) / errorRate) + Math.log(data.listOfClasses.size() - 1));
-    }
-
-    private void updateRowWeight(double alpha, int row) {
-        rowWeights.replace(row, rowWeights.get(row) * Math.exp(alpha));
-    }
 
     private void normalizeRowWeights() {
-        Double[] array = rowWeights.values().toArray(new Double[rowWeights.values().size()]);
+        Double[] array = rowWeights.toArray(new Double[rowWeights.size()]);
         double[] normalizedArray = normalizeArray(array);
         for (int i = 0; i < rowWeights.size(); i++) {
-            rowWeights.replace(i, normalizedArray[i]);
+            rowWeights.set(i, normalizedArray[i]);
         }
     }
 
@@ -207,10 +201,6 @@ public class AdaBoost implements Classifier {
         private HashMap<String, HashMap<Integer, Probabilities>> continuousProbabilityMap = new HashMap<>();
         private HashMap<String, HashMap<Integer, HashMap<String, Double>>> discreteProbabilityMap = new HashMap<>();
 
-        public NBClassifier(ClassifierData classifierData) {
-            reTrain(classifierData);
-        }
-
         public NBClassifier(ClassifierData classifierData, Boolean isDiscrete) {
             this.isDiscrete = isDiscrete;
             reTrain(classifierData);
@@ -221,7 +211,7 @@ public class AdaBoost implements Classifier {
             if(data.rowWeights.isEmpty())
             {
                 for (int i = 0; i < data.getNumberOfDataRows(); i++) {
-                    this.data.rowWeights.put(i,1.0);
+                    this.data.rowWeights.add(i,1.0);
                 }
             }
 
@@ -232,13 +222,15 @@ public class AdaBoost implements Classifier {
 
             //get data for each unique class
             for (String label : data.listOfClasses) {
-                int labelCount = 0;
+                double labelCount = 0;
+                double totalCount = 0;
                 for (int i = 0; i < data.classArray.length; i++) {
                     String c = data.classArray[i];
+                    totalCount += data.rowWeights.get(i);
                     if (label.equals(c))
-                        labelCount++;
+                        labelCount += data.rowWeights.get(i);
                 }
-                double priorProb = ((double) labelCount) / data.classArray.length;
+                double priorProb =  labelCount / totalCount;
                 priorMap.put(label, priorProb);
 
                 if (this.isDiscrete) {
@@ -255,7 +247,7 @@ public class AdaBoost implements Classifier {
                                 if (attr.equals(col[j])) {
                                     attrCount += data.rowWeights.get(i);
                                     if (label.equals(data.classArray[j])) {
-                                        classAndAttrCount+= data.rowWeights.get(i);;
+                                        classAndAttrCount+= data.rowWeights.get(i);
                                     }
                                 }
                             }
@@ -277,7 +269,8 @@ public class AdaBoost implements Classifier {
         }
 
         public Classifier clone(ClassifierData data) {
-            return new NBClassifier(data, this.isDiscrete);
+            return new NBClassifier(new ClassifierData(data.NumberOfDataColumns, data.getDataArray(),
+                    data.getClassArray(), data.rowWeights), this.isDiscrete);
         }
 
         public String classify(String[] featureArray) {
