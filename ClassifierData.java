@@ -18,6 +18,10 @@ public class ClassifierData {
     public HashSet<String> listOfClasses = new HashSet<>();
     private static final String MISSING_VALUE_STRING = "?";
 
+    //for Adaboost
+    public HashMap<Integer, Double> rowWeights = new HashMap<>();
+
+
     public static void main(String[] args){
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
 //        try {
@@ -166,6 +170,16 @@ public class ClassifierData {
         this.NumberOfDataColumns = numberOfDataColumns;
         this.dataArray = dataArray;
         this.classArray = dataClasses;
+        this.getListOfClasses();
+        this.flipDataArray();
+    }
+
+    public ClassifierData(int numberOfDataColumns,String[][] dataArray, String[] dataClasses, HashMap<Integer, Double> rowWeights) { //for Adaboost
+        this.NumberOfDataRows = dataArray.length;
+        this.NumberOfDataColumns = numberOfDataColumns;
+        this.dataArray = dataArray;
+        this.classArray = dataClasses;
+        this.rowWeights = new HashMap<Integer,Double>(rowWeights);
         this.getListOfClasses();
         this.flipDataArray();
     }
