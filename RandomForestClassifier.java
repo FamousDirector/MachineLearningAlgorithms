@@ -1,7 +1,4 @@
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 
 public class RandomForestClassifier implements Classifier {
     private ClassifierData data;
@@ -14,14 +11,14 @@ public class RandomForestClassifier implements Classifier {
 
 
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
 
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
 //            partialDataset.removeDataColumn(0);
             RandomForestClassifier id3 = new RandomForestClassifier(partialDataset);
@@ -126,7 +123,6 @@ public class RandomForestClassifier implements Classifier {
         int colToSplitOn; //the column that gives the best entropy at this node moving forward
         String splitOnAttr; //the value the parent used to create this node
         HashMap<String, DecisionNode> children = new HashMap<>();
-        int depth;
         double entropy;
         DecisionNode parent;
         HashSet<Integer> cols = new HashSet<>();
@@ -134,7 +130,10 @@ public class RandomForestClassifier implements Classifier {
 
         DecisionNode(){ //root
             parent = null;
-            depth = 0;
+
+            //Random
+            randomlyChooseColumns();
+
             for (Integer i = 0; i < data.getNumberOfDataRows(); i++) {
                 rows.add(i);
             }
@@ -196,8 +195,6 @@ public class RandomForestClassifier implements Classifier {
             this.parent = parent;
             this.cols = new HashSet<>(parent.cols);
             this.rows = new HashSet<>(parent.rows);
-            depth = parent.depth +1;
-//            System.out.println(depth);//debug todo
 
             //get rows that don't match attToSplitOn
             HashSet<Integer> toBeRemoved = new HashSet<>();
@@ -209,6 +206,9 @@ public class RandomForestClassifier implements Classifier {
             rows.removeAll(toBeRemoved);
             //remove col
             cols.remove(parent.colToSplitOn);
+
+            //Random
+            randomlyChooseColumns();
 
             //see if pure
             HashSet<String> classesLeft = new HashSet<>();
@@ -233,6 +233,28 @@ public class RandomForestClassifier implements Classifier {
             {
                 isLeaf = true;
                 leafClass = data.classArray[toBeRemoved.iterator().next()];
+                return;
+            }
+
+            if (cols.size() == 0) //no splitting left
+            {
+                isLeaf = true;
+
+                int highestCount = -1;
+                String highestClass = "";
+                for (String c : classesLeft) {
+                    int count = 0;
+                    for (String r : classRowsLeft) {
+                        if (r.equals(c))
+                            count++;
+                    }
+                    if(highestCount < count)
+                    {
+                        highestClass = c;
+                        highestCount = count;
+                    }
+                }
+                leafClass = highestClass;
                 return;
             }
 
@@ -283,9 +305,23 @@ public class RandomForestClassifier implements Classifier {
             }
         }
 
+        private void randomlyChooseColumns()
+        {
+            if(cols.size() > 1) {
+                int numberToKeep = (int) Math.sqrt(cols.size());
+                int numberToRemove = cols.size() - numberToKeep;
+
+                Random rand = new Random();
+
+                for (int i = 0; i < numberToRemove; i++) {
+                    int toBeRemoved = rand.nextInt(cols.size() - 1);
+                    cols.remove(toBeRemoved);
+                }
+            }
+        }
     }
 
-    public static double entropy(double p) {
+    private static double entropy(double p) {
         if (p == 0 || p == 1)
             return 0;
         return -p * (Math.log(p)/Math.log(2));
