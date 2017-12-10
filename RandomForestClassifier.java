@@ -1,12 +1,13 @@
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class RandomForestClassifier implements Classifier {
     private ClassifierData data;
     private DecisionNode tree;
-    private int maxDepth = -1;
-    private boolean stopEarly = false;
+    private int numOfBags = 10;
+    LinkedList<DecisionNode> trees = new LinkedList<>();
 
     public static void main(String[] args) {
         System.out.println("---RandomForest---");
@@ -23,7 +24,7 @@ public class RandomForestClassifier implements Classifier {
             ClassifierData fullDataset = new ClassifierData(samplePath, 0);
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
 //            partialDataset.removeDataColumn(0);
-            RandomForestClassifier id3 = new RandomForestClassifier(partialDataset,false);
+            RandomForestClassifier id3 = new RandomForestClassifier(partialDataset);
             CrossValidation cv = CrossValidation.kFold(5, id3, fullDataset, 10);
             System.out.println("Error: " +cv.mean);
         } catch (Exception e) {
@@ -34,7 +35,7 @@ public class RandomForestClassifier implements Classifier {
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 4);
 //            fullDataset.removeDataColumn(0);
-//            IDThreeClassifier id3 = new IDThreeClassifier(fullDataset);
+//            RandomForestClassifier id3 = new RandomForestClassifier(fullDataset);
 //            String c = id3.classify(new String[]{"Rainy","Yes","Poor"});
 //            System.out.println(c);
 //        } catch (Exception e) {
@@ -47,69 +48,60 @@ public class RandomForestClassifier implements Classifier {
         reTrain(data);
     }
 
-    public RandomForestClassifier(ClassifierData data, int maxDepth)
-    {
-        this.stopEarly = false;
-        createTree(data,maxDepth);
-    }
-
-    public RandomForestClassifier(ClassifierData data, boolean stopEarly)
-    {
-        this.stopEarly = stopEarly;
-        reTrain(data);
-    }
 
     public Classifier clone(ClassifierData data) {
-        return new IDThreeClassifier(data,this.stopEarly);
-    }
-
-    public void createTree(ClassifierData classifierData, int maxDepth) {
-        this.maxDepth = maxDepth;
-        createTree(classifierData);
+        return new RandomForestClassifier(data);
     }
 
     public void reTrain(ClassifierData classifierData) {
-        if(!this.stopEarly)
-        {
-            createTree(classifierData);
-        }
-        else {
-            double prevError = 2;
-            double error = 1;
-            maxDepth = 1;
-            while (prevError > error)
-            {
-                maxDepth++;
-                prevError = error;
-                IDThreeClassifier iDT = new IDThreeClassifier(classifierData,maxDepth);
-                CrossValidation cv = CrossValidation.kFold(2, iDT, classifierData, 5);
-                error = cv.mean;
-//                System.out.println("Error: " + error + " --- Depth " + maxDepth); //debug
-            }
-
-            //once best depth is known
-            createTree(classifierData,maxDepth-1);
-        }
-    }
-
-    private void createTree(ClassifierData classifierData) {
         this.data = classifierData;
-        this.tree = new DecisionNode();
+
+        //create forest
+        for (int i = 0; i < this.numOfBags; i++) {
+            trees.add(createTree());
+        }
     }
 
-    public String classify(String [] features)
-    {
-        DecisionNode node = tree;
-        while (!node.isLeaf) {
-            if (node.children.containsKey(features[node.colToSplitOn])) {
-                node = node.children.get(features[node.colToSplitOn]);
-            } else //just take the next node
-            {
-                node = node.children.values().iterator().next();
-            }
+    private DecisionNode createTree() {
+        return new DecisionNode();
+    }
 
+    public String classify(String [] features) {
+        HashMap<String,Integer> results = new HashMap<>();
+        for (DecisionNode tree : trees){
+            DecisionNode node = tree;
+            while (!node.isLeaf) {
+                if (node.children.containsKey(features[node.colToSplitOn])) {
+                    node = node.children.get(features[node.colToSplitOn]);
+                } else //just take the next node
+                {
+                    node = node.children.values().iterator().next();
+                }
+
+            }
+            String result = node.leafClass;
+            if(!results.containsKey(result))
+            {
+                results.put(result,1);
+            }
+            else
+            {
+                results.replace(result,results.get(result)+1);
+            }
         }
-        return node.leafClass;
+
+        int highestCount = -1;
+        String highestResult = "";
+
+        for (String resultClass : results.keySet())
+        {
+            if(results.get(resultClass) > highestCount)
+            {
+                highestCount = results.get(resultClass);
+                highestResult = resultClass;
+            }
+        }
+        return highestResult;
     }
 
     private static double totalEntropy(String[] a, HashSet<String> l)
@@ -208,7 +200,7 @@ public class RandomForestClassifier implements Classifier {
 //            System.out.println(depth);//debug todo
 
             //get rows that don't match attToSplitOn
-            HashSet<Integer> toBeRemoved = new HashSet<>();;
+            HashSet<Integer> toBeRemoved = new HashSet<>();
             for (Integer row : rows)
             {
                 if (!splitOnAttr.equals(data.dataArray[row][parent.colToSplitOn]))
@@ -241,27 +233,6 @@ public class RandomForestClassifier implements Classifier {
             {
                 isLeaf = true;
                 leafClass = data.classArray[toBeRemoved.iterator().next()];
-                return;
-            }
-
-            if (depth >= maxDepth) //early stop
-            {
-                int mostCommonClassCount = -1;
-                String mostCommonClass = "";
-                for (String c :classesLeft){
-                    int count = 0;
-                    for(int row : rows){
-                        if(c.equals(data.classArray[row]))
-                            count++;
-                    }
-                    if (count > mostCommonClassCount)
-                    {
-                        mostCommonClass = c;
-                        mostCommonClassCount = count;
-                    }
-                }
-                isLeaf = true;
-                leafClass = mostCommonClass;
                 return;
             }
 
