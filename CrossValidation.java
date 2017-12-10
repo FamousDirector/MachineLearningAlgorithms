@@ -28,6 +28,12 @@ public class CrossValidation {
         double[] errors = new double[k];
         int numberOfDataPointsPerK = classifierData.getDataArray().length / k;
 
+        if (k < 2)
+        {
+            System.out.println("k for kFold must be 2 or larger");
+            return null;
+        }
+
         //shuffle data
         classifierData.shuffle();
 

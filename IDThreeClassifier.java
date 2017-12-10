@@ -23,16 +23,17 @@ public class IDThreeClassifier implements Classifier {
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
 
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
             ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset, 0, 10);
 //            partialDataset.removeDataColumn(0);
-            IDThreeClassifier id3 = new IDThreeClassifier(partialDataset,true);
+            IDThreeClassifier id3 = new IDThreeClassifier(partialDataset,false);
             CrossValidation cv = CrossValidation.kFold(5, id3, fullDataset, 10);
             System.out.println("Error: " +cv.mean);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 4);
 //            fullDataset.removeDataColumn(0);
@@ -86,7 +87,7 @@ public class IDThreeClassifier implements Classifier {
                 IDThreeClassifier iDT = new IDThreeClassifier(classifierData,maxDepth);
                 CrossValidation cv = CrossValidation.kFold(2, iDT, classifierData, 5);
                 error = cv.mean;
-//                System.out.println("Error " + error + " --- Depth " + maxDepth); //debug
+//                System.out.println("Error: " + error + " --- Depth " + maxDepth); //debug
             }
 
             //once best depth is known
