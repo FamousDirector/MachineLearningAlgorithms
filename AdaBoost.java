@@ -39,7 +39,7 @@ public class AdaBoost implements Classifier {
     LinkedList<Double> modelWeights = new LinkedList<>();
     LinkedList<Classifier> weakClassifiers = new LinkedList<>();
     private int maxIterations = 100;
-    private int START_ITERATIONS = 100;
+    private int START_ITERATIONS = 25;
 
     public AdaBoost(ClassifierData data, Classifier classifier, int maxIterations) {
         this.data = data;
@@ -108,7 +108,7 @@ public class AdaBoost implements Classifier {
             }
             double errorRate = incorrectSum / totalSum;
 
-            System.out.println("Debug = " + errorRate + " Depth: " + numberOfIterations); //debug
+//            System.out.println("Debug = " + errorRate + " Depth: " + numberOfIterations); //debug
 
             // set model weights
             double newModelWeight = Math.log((1 - errorRate) / errorRate) + Math.log(data.listOfClasses.size() - 1);
@@ -119,13 +119,13 @@ public class AdaBoost implements Classifier {
                 String[] featureArray = data.getDataArray()[i];
                 if (!classifier.classify(featureArray).equals(data.getClassArray()[i])) //incorrect classification
                 {
-                    double newRowWeight = Math.exp(newModelWeight) * rowWeights.get(i);
+                    double newRowWeight = Math.exp(-newModelWeight) * rowWeights.get(i);
                     rowWeights.set(i,newRowWeight);
                 }
             }
 
             //normalize weights
-            //normalizeRowWeights();
+            normalizeRowWeights(rowWeights);
 
             numberOfIterations++; //next
         }
@@ -161,33 +161,33 @@ public class AdaBoost implements Classifier {
     }
 
 
-    private void normalizeRowWeights() {
+    private void normalizeRowWeights(LinkedList<Double> rowWeights) {
         Double[] array = rowWeights.toArray(new Double[rowWeights.size()]);
-        double[] normalizedArray = normalizeArray(array);
-        for (int i = 0; i < rowWeights.size(); i++) {
-            rowWeights.set(i, normalizedArray[i]);
+        double[] normalizedArray = normalizeArray(array,rowWeights);
+        for (int i = 0; i < this.rowWeights.size(); i++) {
+            this.rowWeights.set(i, normalizedArray[i]);
         }
     }
 
-    private static double[] normalizeArray(Double[] inputArray) {
+    private double[] normalizeArray(Double[] inputArray, LinkedList<Double> rowWeights) { //normalize weights to equal 1
         double[] normalizedArray = new double[inputArray.length];
-        double max = 0;
-        double min = Double.POSITIVE_INFINITY;
+        double total = getTotalRowWeight(rowWeights);
 
-        //find min and max
+        //normalize
         for (int i = 0; i < inputArray.length; i++) {
-            if (inputArray[i] > max) {
-                max = inputArray[i];
-            }
-            if (inputArray[i] < min) {
-                min = inputArray[i];
-            }
+            normalizedArray[i] = inputArray[i]/total;
         }
 
-        for (int i = 0; i < inputArray.length; i++) {
-            normalizedArray[i] = (inputArray[i] - min) / (max - min);
-        }
         return normalizedArray;
+    }
+
+    private double getTotalRowWeight(LinkedList<Double> rowWeights)
+    {
+        double total = 0;
+        for (int i = 0; i < rowWeights.size(); i++) {
+            total += rowWeights.get(i);
+        }
+        return total;
     }
 
     private static class NBClassifier implements Classifier {
@@ -384,6 +384,15 @@ public class AdaBoost implements Classifier {
         }
 
         public void reTrain(ClassifierData classifierData) {
+            this.data =classifierData;
+
+            if(data.rowWeights.isEmpty())
+            {
+                for (int i = 0; i < data.getNumberOfDataRows(); i++) {
+                    this.data.rowWeights.add(i,1.0);
+                }
+            }
+
             if(!this.stopEarly)
             {
                 createTree(classifierData);
