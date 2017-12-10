@@ -268,6 +268,28 @@ public class IDThreeClassifier implements Classifier {
                 return;
             }
 
+            if (cols.size() == 0) //no splitting left
+            {
+                isLeaf = true;
+
+                int highestCount = -1;
+                String highestClass = "";
+                for (String c : classesLeft) {
+                    int count = 0;
+                    for (String r : classRowsLeft) {
+                        if (r.equals(c))
+                            count++;
+                    }
+                    if(highestCount < count)
+                    {
+                        highestClass = c;
+                        highestCount = count;
+                    }
+                }
+                leafClass = highestClass;
+                return;
+            }
+
             double highestGain = -1;
             int bestCol = -1;
             for (Integer col : cols) {
