@@ -142,6 +142,28 @@ public class RandomForestClassifier implements Classifier {
             }
             entropy = totalEntropy(data.classArray,data.listOfClasses);
 
+            if (cols.size() == 0) //no splitting left
+            {
+                isLeaf = true;
+
+                int highestCount = -1;
+                String highestClass = "";
+                for (String c : data.listOfClasses) {
+                    int count = 0;
+                    for (String r : data.classArray) {
+                        if (r.equals(c))
+                            count++;
+                    }
+                    if(highestCount < count)
+                    {
+                        highestClass = c;
+                        highestCount = count;
+                    }
+                }
+                leafClass = highestClass;
+                return;
+            }
+
             double highestGain = -1;
             int bestCol = -1;
             for (Integer col : cols) {
@@ -182,6 +204,7 @@ public class RandomForestClassifier implements Classifier {
                     bestCol = col;
                 }
             }
+
             this.colToSplitOn = bestCol;
             HashSet<String> values = new HashSet<String>(Arrays.asList(data.flippedDataArray[bestCol]));
             for (String attr : values) {
