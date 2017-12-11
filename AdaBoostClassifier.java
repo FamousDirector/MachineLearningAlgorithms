@@ -39,7 +39,7 @@ public class AdaBoostClassifier implements Classifier {
     LinkedList<Double> modelWeights = new LinkedList<>();
     LinkedList<Classifier> weakClassifiers = new LinkedList<>();
     private int maxIterations = 100;
-    private int START_ITERATIONS = 25;
+    private int START_ITERATIONS = 1;
 
     public AdaBoostClassifier(ClassifierData data, Classifier classifier, int maxIterations) {
         this.data = data;
@@ -436,17 +436,19 @@ public class AdaBoostClassifier implements Classifier {
             return node.leafClass;
         }
 
-        private double totalEntropy(String[] a, HashSet<String> l)
+        private double totalEntropy(String[] a, HashSet<String> l, LinkedList<Double> rowWeights)
         {
             double total = 0;
+            double weightSum = 0;
             for (String label : l) {
-                int count = 0;
+                double count = 0;
                 for (int j = 0; j < a.length; j++) {
+                    weightSum += rowWeights.get(j);
                     if(label.equals(a[j])){
-                        count++;
+                        count += rowWeights.get(j);
                     }
                 }
-                total += entropy(((double) count)/a.length);
+                total += entropy((count)/weightSum);
             }
             return total;
         }
@@ -463,9 +465,11 @@ public class AdaBoostClassifier implements Classifier {
             DecisionNode parent;
             HashSet<Integer> cols = new HashSet<>();
             HashSet<Integer> rows = new HashSet<>();
+            LinkedList<Double> rowWeights = new LinkedList<>();
 
             DecisionNode(){ //root
                 parent = null;
+                this.rowWeights = data.rowWeights;
                 depth = 0;
                 for (Integer i = 0; i < data.getNumberOfDataRows(); i++) {
                     rows.add(i);
@@ -473,7 +477,7 @@ public class AdaBoostClassifier implements Classifier {
                 for (Integer i = 0; i < data.getNumberOfDataColumns(); i++) {
                     cols.add(i);
                 }
-                entropy = totalEntropy(data.classArray,data.listOfClasses);
+                entropy = totalEntropy(data.classArray,data.listOfClasses,data.rowWeights);
 
                 double highestGain = -1;
                 int bestCol = -1;
@@ -528,6 +532,7 @@ public class AdaBoostClassifier implements Classifier {
                 this.parent = parent;
                 this.cols = new HashSet<>(parent.cols);
                 this.rows = new HashSet<>(parent.rows);
+                this.rowWeights = new LinkedList<>(parent.rowWeights);
                 depth = parent.depth +1;
 //            System.out.println(depth);//debug todo
 
@@ -535,10 +540,13 @@ public class AdaBoostClassifier implements Classifier {
                 HashSet<Integer> toBeRemoved = new HashSet<>();;
                 for (Integer row : rows)
                 {
-                    if (!splitOnAttr.equals(data.dataArray[row][parent.colToSplitOn]))
+                    if (!splitOnAttr.equals(data.dataArray[row][parent.colToSplitOn])) {
                         toBeRemoved.add(row);
+                        rowWeights.remove(row);
+                    }
                 }
                 rows.removeAll(toBeRemoved);
+
                 //remove col
                 cols.remove(parent.colToSplitOn);
 
@@ -559,7 +567,7 @@ public class AdaBoostClassifier implements Classifier {
                     return;
                 }
 
-                entropy = totalEntropy(classRowsLeft,classesLeft);
+                entropy = totalEntropy(classRowsLeft,classesLeft, rowWeights);
 
                 if (entropy == (double)0)
                 {
@@ -576,7 +584,7 @@ public class AdaBoostClassifier implements Classifier {
                         double count = 0;
                         for(int row : rows){
                             if(c.equals(data.classArray[row]))
-                                count =+ data.rowWeights.get(row);
+                                count += data.rowWeights.get(row);
                         }
                         if (count > mostCommonClassCount)
                         {
