@@ -1,9 +1,9 @@
 import java.util.*;
 
-public class AdaBoost implements Classifier {
+public class AdaBoostClassifier implements Classifier {
 
     public static void main(String[] args) {
-        System.out.println("---AdaBoost---");
+        System.out.println("---AdaBoostClassifier---");
 
         //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
         String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
@@ -15,7 +15,7 @@ public class AdaBoost implements Classifier {
 //        try {
 //            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
 ////            fullDataset.removeDataColumn(0);
-//            AdaBoost ada = new AdaBoost(fullDataset, new NBClassifier(fullDataset, true),100);
+//            AdaBoostClassifier ada = new AdaBoostClassifier(fullDataset, new NBClassifier(fullDataset, true),100);
 //            CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 1);
 //            System.out.println("Error = " + cv.mean);
 //        } catch (Exception e) {
@@ -25,7 +25,7 @@ public class AdaBoost implements Classifier {
         try {
             ClassifierData fullDataset = new ClassifierData(samplePath, 0);
 //            fullDataset.removeDataColumn(0);
-            AdaBoost ada = new AdaBoost(fullDataset, new IDThreeClassifier(fullDataset,false));
+            AdaBoostClassifier ada = new AdaBoostClassifier(fullDataset, new IDThreeClassifier(fullDataset,false));
             CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 2);
             System.out.println("Error = " + cv.mean);
         } catch (Exception e) {
@@ -41,7 +41,7 @@ public class AdaBoost implements Classifier {
     private int maxIterations = 100;
     private int START_ITERATIONS = 25;
 
-    public AdaBoost(ClassifierData data, Classifier classifier, int maxIterations) {
+    public AdaBoostClassifier(ClassifierData data, Classifier classifier, int maxIterations) {
         this.data = data;
         this.weakClassifier = classifier;
         this.maxIterations = maxIterations;
@@ -51,7 +51,7 @@ public class AdaBoost implements Classifier {
         reTrain(data);
     }
 
-    public AdaBoost(ClassifierData data, Classifier classifier) {
+    public AdaBoostClassifier(ClassifierData data, Classifier classifier) {
         this.data = data;
         this.weakClassifier = classifier;
         for (int i = 0; i < data.getNumberOfDataRows(); i++) {
@@ -63,7 +63,7 @@ public class AdaBoost implements Classifier {
         int iterations = START_ITERATIONS;
         while (prevError > error) {
             prevError = error;
-            AdaBoost ada = new AdaBoost(data, classifier, iterations);
+            AdaBoostClassifier ada = new AdaBoostClassifier(data, classifier, iterations);
             CrossValidation cv = CrossValidation.kFold(2, ada, data, 5);
             error = cv.mean;
             System.out.println("Error: " + error + " --- Depth " + iterations); //debug
