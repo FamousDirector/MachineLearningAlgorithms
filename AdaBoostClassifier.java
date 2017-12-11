@@ -193,13 +193,10 @@ public class AdaBoostClassifier implements Classifier {
     private static class NBClassifier implements Classifier {
 
         ClassifierData data;
-        private Boolean isDiscrete = true;
         private HashMap<String, Double> priorMap = new HashMap<>();
-        private HashMap<String, HashMap<Integer, Probabilities>> continuousProbabilityMap = new HashMap<>();
         private HashMap<String, HashMap<Integer, HashMap<String, Double>>> discreteProbabilityMap = new HashMap<>();
 
-        public NBClassifier(ClassifierData classifierData, Boolean isDiscrete) {
-            this.isDiscrete = isDiscrete;
+        public NBClassifier(ClassifierData classifierData) {
             reTrain(classifierData);
         }
 
@@ -210,11 +207,6 @@ public class AdaBoostClassifier implements Classifier {
                 for (int i = 0; i < data.getNumberOfDataRows(); i++) {
                     this.data.rowWeights.add(i,1.0);
                 }
-            }
-
-            if (!this.isDiscrete && !data.isDataNumeric()) {
-                this.isDiscrete = true;
-                System.out.println("Incorrect assumption, data is discrete");
             }
 
             //get data for each unique class
@@ -230,44 +222,34 @@ public class AdaBoostClassifier implements Classifier {
                 double priorProb =  labelCount / totalCount;
                 priorMap.put(label, priorProb);
 
-                if (this.isDiscrete) {
-                    HashMap<Integer, HashMap<String, Double>> columnAttributeMap = new HashMap<>();
-                    for (int i = 0; i < data.getNumberOfDataColumns(); i++) {
-                        String[] col = data.flippedDataArray[i];
-                        HashSet<String> uniqueAttributes = getUniqueAttributes(col);
-                        HashMap<String, Double> attributeMap = new HashMap<>();
+                HashMap<Integer, HashMap<String, Double>> columnAttributeMap = new HashMap<>();
+                for (int i = 0; i < data.getNumberOfDataColumns(); i++) {
+                    String[] col = data.flippedDataArray[i];
+                    HashSet<String> uniqueAttributes = getUniqueAttributes(col);
+                    HashMap<String, Double> attributeMap = new HashMap<>();
 
-                        for (String attr : uniqueAttributes) {
-                            double attrCount = 0;
-                            double classAndAttrCount = 0;
-                            for (int j = 0; j < col.length; j++) {
-                                if (attr.equals(col[j])) {
-                                    attrCount += data.rowWeights.get(i);
-                                    if (label.equals(data.classArray[j])) {
-                                        classAndAttrCount+= data.rowWeights.get(i);
-                                    }
+                    for (String attr : uniqueAttributes) {
+                        double attrCount = 0;
+                        double classAndAttrCount = 0;
+                        for (int j = 0; j < col.length; j++) {
+                            if (attr.equals(col[j])) {
+                                attrCount += data.rowWeights.get(i);
+                                if (label.equals(data.classArray[j])) {
+                                    classAndAttrCount+= data.rowWeights.get(i);
                                 }
                             }
-                            attributeMap.put(attr, classAndAttrCount / attrCount);
                         }
-                        columnAttributeMap.put(i, attributeMap);
+                        attributeMap.put(attr, classAndAttrCount / attrCount);
                     }
-                    this.discreteProbabilityMap.put(label, columnAttributeMap);
-                } else //continuous
-                {
-                    HashMap<Integer, Probabilities> probabilityMap = new HashMap<>();
-                    for (int i = 0; i < data.getNumberOfDataColumns(); i++) {
-                        double[] col = ClassifierData.makeDataNumeric(data.flippedDataArray[i]);
-                        probabilityMap.put(i, new Probabilities(col));
-                    }
-                    continuousProbabilityMap.put(label, probabilityMap);
+                    columnAttributeMap.put(i, attributeMap);
                 }
+                this.discreteProbabilityMap.put(label, columnAttributeMap);
             }
         }
 
         public Classifier clone(ClassifierData data) {
             return new NBClassifier(new ClassifierData(data.NumberOfDataColumns, data.getDataArray(),
-                    data.getClassArray(), data.rowWeights), this.isDiscrete);
+                    data.getClassArray(), data.rowWeights));
         }
 
         public String classify(String[] featureArray) {
@@ -276,17 +258,9 @@ public class AdaBoostClassifier implements Classifier {
             for (String label : data.listOfClasses) {
                 double newProb = priorMap.get(label);
                 for (int i = 0; i < featureArray.length; i++) {
-
-                    if (isDiscrete) {
-                        String attr = featureArray[i];
-                        double prob = discreteProbabilityMap.get(label).get(i).getOrDefault(attr, 0.0);
-                        newProb = newProb * prob;
-
-                    } else {
-                        double val = Double.parseDouble(featureArray[i]);
-                        double prob = continuousProbabilityMap.get(label).get(i).pdf(val);
-                        newProb = newProb * prob;
-                    }
+                    String attr = featureArray[i];
+                    double prob = discreteProbabilityMap.get(label).get(i).getOrDefault(attr, 0.0);
+                    newProb = newProb * prob;
                 }
                 if (highestProb < newProb) {
                     likelyClass = label;
