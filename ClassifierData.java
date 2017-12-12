@@ -12,8 +12,8 @@ public class ClassifierData {
 
     public int NumberOfDataRows;
     public int NumberOfDataColumns;
-    public String[][] dataArray;
-    public String[][] flippedDataArray;
+    public String[][] dataArray; //[row][col]
+    public String[][] flippedDataArray; //[col][row]
     public String[] classArray;
     public HashSet<String> listOfClasses = new HashSet<>();
     private static final String MISSING_VALUE_STRING = "?";
@@ -23,28 +23,19 @@ public class ClassifierData {
 
 
     public static void main(String[] args){
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
-//        try {
-//            HashMap<String,String> valuesToBeReplaced = new HashMap<String,String>();
-//            valuesToBeReplaced.put("low","1");
-//            valuesToBeReplaced.put("small","1");
-//            valuesToBeReplaced.put("med","2");
-//            valuesToBeReplaced.put("high","3");
-//            valuesToBeReplaced.put("big","3");
-//            valuesToBeReplaced.put("vhigh","4");
-//            valuesToBeReplaced.put("5more","5.5");
-//            valuesToBeReplaced.put("more","5.5");
-//
-//            ClassifierData newClassifierData = new ClassifierData(samplePath,6,valuesToBeReplaced);
-//            System.out.println();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data";
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data";
         try {
+            HashMap<String,String> valuesToBeReplaced = new HashMap<String,String>();
+            valuesToBeReplaced.put("low","1");
+            valuesToBeReplaced.put("small","1");
+            valuesToBeReplaced.put("med","2");
+            valuesToBeReplaced.put("high","3");
+            valuesToBeReplaced.put("big","3");
+            valuesToBeReplaced.put("vhigh","4");
+            valuesToBeReplaced.put("5more","5.5");
+            valuesToBeReplaced.put("more","5.5");
 
-            ClassifierData newClassifierData = new ClassifierData(samplePath,6);
+            ClassifierData newClassifierData = new ClassifierData(samplePath,6,valuesToBeReplaced);
             System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,7 +44,7 @@ public class ClassifierData {
 
     /**
      *
-     * Constructs a 2 dimensional array of values based upon the specified text file from @param dataFilePath
+     * Constructs a ClassifierData object based upon the specified text file from @param dataFilePath
      * @param dataFilePath the path to the data file that
      * @param classRowPosition the zero indexed row of the class data
      * @throws IOException
@@ -126,17 +117,31 @@ public class ClassifierData {
         replaceEmptyVales();
     }
 
+    /**
+     * For replacing values within the dataset
+     * @param dataFilePath
+     * @param classRowPosition
+     * @param valuesToBeReplaced replaces the key with the value
+     * @throws IOException
+     */
     public ClassifierData(String dataFilePath, int classRowPosition, HashMap valuesToBeReplaced) throws IOException{
         this(dataFilePath,classRowPosition);
         replaceDataWithValue(valuesToBeReplaced);
     }
 
+    /**
+     * For removing attributes below a entropy threshold
+     * @param dataFilePath
+     * @param classRowPosition
+     * @param reduceDimensionality
+     * @throws IOException
+     */
     public ClassifierData(String dataFilePath, int classRowPosition, boolean reduceDimensionality) throws IOException{
         this(dataFilePath,classRowPosition,reduceDimensionality,MIN_ENTROPY);
     }
 
 
-    public ClassifierData(String dataFilePath, int classRowPosition, boolean reduceDimensionality, double minentropy) throws IOException{
+    public ClassifierData(String dataFilePath, int classRowPosition, boolean reduceDimensionality, double minEntropy) throws IOException{
         this(dataFilePath,classRowPosition);
         if(reduceDimensionality){
             ArrayList<Integer> toBeRemoved = new ArrayList<>();
@@ -156,7 +161,7 @@ public class ClassifierData {
                     }
                     total += entropy(((double) count) / col.length);
                 }
-                if (total < minentropy){
+                if (total < minEntropy){
                     toBeRemoved.add(i);
                 }
             }

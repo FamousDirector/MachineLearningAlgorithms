@@ -11,8 +11,6 @@ public class CrossValidation {
     double variance;
     double standardDeviation;
 
-
-
     public CrossValidation(double[] data) {
         this.mean = getMean(data);
         this.standardDeviation = getStdDev(data);
@@ -72,8 +70,8 @@ public class CrossValidation {
         }
         else if(k != 5 || totalReps != 10)
         {
-            System.out.println("!!! YOU ARE NOT USING REGULATED KFOLD !!!");
-            System.out.println("k=" + k + " reps=" + totalReps);
+//            System.out.println("!!! YOU ARE NOT USING REGULATED KFOLD !!!");
+//            System.out.println("k=" + k + " reps=" + totalReps);
 
         }
 

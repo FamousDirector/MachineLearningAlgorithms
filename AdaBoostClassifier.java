@@ -5,41 +5,42 @@ public class AdaBoostClassifier implements Classifier {
     public static void main(String[] args) {
         System.out.println("---AdaBoostClassifier---");
 
-        //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
 
-//        try {
-//            ClassifierData fullDataset = new ClassifierData(samplePath, 6);
-////            fullDataset.removeDataColumn(0);
-//            AdaBoostClassifier ada = new AdaBoostClassifier(fullDataset, new NBClassifier(fullDataset, true),100);
-//            CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 1);
-//            System.out.println("Error = " + cv.mean);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
+        //Adaboost Naive Bayes
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-//            fullDataset.removeDataColumn(0);
-            AdaBoostClassifier ada = new AdaBoostClassifier(fullDataset, new IDThreeClassifier(fullDataset,false));
-            CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 2);
-            System.out.println("Error = " + cv.mean);
+            ClassifierData fullDataset = new ClassifierData(samplePath, 8);
+            fullDataset.removeDataColumn(0);
+            AdaBoostClassifier ada = new AdaBoostClassifier(fullDataset, new NBClassifier(fullDataset));
+            CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 10);
+            System.out.println("Acc = " + (1.0-cv.mean)+ ", StdDev: " + cv.standardDeviation);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //Adaboost ID3
+//        try {
+//            ClassifierData fullDataset = new ClassifierData(samplePath, 8);
+//            fullDataset.removeDataColumn(0);
+//            AdaBoostClassifier ada = new AdaBoostClassifier(fullDataset, new IDThreeClassifier(fullDataset,false));
+//            CrossValidation cv = CrossValidation.kFold(5, ada, fullDataset, 10);
+//            System.out.println("Acc = " + (1.0-cv.mean)+ ", StdDev: " + cv.standardDeviation);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     public Classifier weakClassifier;
     public ClassifierData data;
     LinkedList<Double> rowWeights = new LinkedList<>();
-    LinkedList<Double> modelWeights = new LinkedList<>();
+    LinkedList<Double> alphaWeights = new LinkedList<>();
     LinkedList<Classifier> weakClassifiers = new LinkedList<>();
     private int maxIterations = 100;
-    private int START_ITERATIONS = 1;
+    private int START_ITERATIONS = 1; //minimum iterations to complete
 
     public AdaBoostClassifier(ClassifierData data, Classifier classifier, int maxIterations) {
         this.data = data;
@@ -112,7 +113,7 @@ public class AdaBoostClassifier implements Classifier {
 
             // set model weights
             double newModelWeight = Math.log((1 - errorRate) / errorRate) + Math.log(data.listOfClasses.size() - 1);
-            this.modelWeights.add(numberOfIterations, newModelWeight);
+            this.alphaWeights.add(numberOfIterations, newModelWeight);
 
             // set new row weights
             for (int i = 0; i < data.getNumberOfDataRows(); i++) {
@@ -144,9 +145,9 @@ public class AdaBoostClassifier implements Classifier {
             Classifier classifier = weakClassifiers.get(i);
             String guess = classifier.classify(featureArray);
             if (!results.containsValue(guess))
-                results.put(guess, modelWeights.get(i));
+                results.put(guess, alphaWeights.get(i));
             else
-                results.replace(guess, results.get(guess) + modelWeights.get(i));
+                results.replace(guess, results.get(guess) + alphaWeights.get(i));
         }
         //take value with highest
         String bestGuess = "";
@@ -358,7 +359,7 @@ public class AdaBoostClassifier implements Classifier {
         }
 
         public void reTrain(ClassifierData classifierData) {
-            this.data =classifierData;
+            this.data = classifierData;
 
             if(data.rowWeights.isEmpty())
             {
@@ -475,7 +476,7 @@ public class AdaBoostClassifier implements Classifier {
                     return;
                 }
 
-                double highestGain = -1;
+                double highestGain = Integer.MIN_VALUE;
                 int bestCol = -1;
                 for (Integer col : cols) {
                     String[] d = data.flippedDataArray[col];

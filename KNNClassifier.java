@@ -8,35 +8,46 @@ public class KNNClassifier implements Classifier{
         System.out.println("---KNN---");
 
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//breast-cancer-wisconsin.data"; //10
-//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
+        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//car.data"; //6
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//ecoli.data"; //8
-        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
+//        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//letter-recognition.data"; //0
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//mushroom.data"; //0
 //        String samplePath = "C://Users//james//Code//CS6735//MachineLearningAlgorithms//data//test.data";
 
+        HashMap<String,String> valuesToBeReplaced = new HashMap<String,String>();
+        valuesToBeReplaced.put("low","1");
+        valuesToBeReplaced.put("small","1");
+        valuesToBeReplaced.put("med","2");
+        valuesToBeReplaced.put("high","3");
+        valuesToBeReplaced.put("big","3");
+        valuesToBeReplaced.put("vhigh","4");
+        valuesToBeReplaced.put("5more","5.5");
+        valuesToBeReplaced.put("more","5.5");
 
-//        try {
-//            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-////            fullDataset.removeDataColumn(0);
-//            KNNClassifier knn = new KNNClassifier(fullDataset,5,2);
-//            CrossValidation cv = CrossValidation.kFold(5, knn, fullDataset,10);
-//            System.out.println("Error = " + cv.mean);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
+        //minikowski
         try {
-            ClassifierData fullDataset = new ClassifierData(samplePath, 0);
-            ClassifierData partialDataset = ClassifierData.createSubsetOfClassifierData(fullDataset,0,1000);
-            fullDataset.removeDataColumn(0);
-            KNNClassifier knn = new KNNClassifier(partialDataset,3,true);
-            CrossValidation cv = CrossValidation.kFold(5, knn, partialDataset,5);
-            System.out.println("Error = " + cv.mean);
+            int p = 2;
+            int k = 5;
+            ClassifierData fullDataset = new ClassifierData(samplePath, 6,valuesToBeReplaced);
+            KNNClassifier knn = new KNNClassifier(fullDataset, k, p);
+            CrossValidation cv = CrossValidation.kFold(5, knn, fullDataset, 10);
+            System.out.println("Acc = " + (1.0-cv.mean)+ ", StdDev: " + cv.standardDeviation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        //malahanobis
+        try {
+            int k = 5;
+            ClassifierData fullDataset = new ClassifierData(samplePath, 6,valuesToBeReplaced);
+            KNNClassifier knn = new KNNClassifier(fullDataset, k, true);
+            CrossValidation cv = CrossValidation.kFold(5, knn, fullDataset, 10);
+            System.out.println("Acc = " + (1.0-cv.mean)+ ", StdDev: " + cv.standardDeviation);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 
     public ClassifierData classifierData;
     public int k;
@@ -205,13 +216,6 @@ public class KNNClassifier implements Classifier{
         }
     }
 
-    private double computeMahalanobisDistance()
-    {
-
-        return 0;
-    }
-
-
     private static double[] normalizeDistance(double [] distances)    {
         double[] normalizedDistances = new double[distances.length];
         double max = 0;
@@ -237,6 +241,11 @@ public class KNNClassifier implements Classifier{
         return s != null && s.matches("[-+]?\\d*\\.?\\d+");
     }
 
+    /**
+     * Sorts an array based on value while maintaining the index
+     * @param originalArray
+     * @return sorted array
+     */
     private static int[] getAscendingValueIndice(double[] originalArray){
         int len = originalArray.length;
 
